@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube Trimmer - Local Video Clipper</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✂️</text></svg>">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24">
+            <path d="M6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3h12a3 3 0 0 0 3-3V6a3 3 0 0 0-3-3H6zm10.5 8.5-6 4A1 1 0 0 1 9 14.667V9.333a1 1 0 0 1 1.5-.866l6 4a1 1 0 0 1 0 1.733z"/>
+          </svg>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <h1 class="brand-title">YT Trimmer</h1>
+            <span class="brand-badge">Local Engine</span>
+          </div>
+          <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.1rem;">Fast, lossless YouTube section downloader running on localhost</p>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="storage-badge">
+          <span>Clips Storage:</span>
+          <span class="highlight" id="totalStorageDisplay">0 MB</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Layout Grid -->
+    <main class="main-grid">
+
+      <!-- Section 1: URL Input -->
+      <section class="glass-card">
+        <div class="section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          Step 1: Paste YouTube URL
+        </div>
+
+        <div class="url-input-wrapper">
+          <input 
+            type="text" 
+            id="urlInput" 
+            class="input-field" 
+            placeholder="https://www.youtube.com/watch?v=..."
+            value="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+            autocomplete="off"
+          >
+          <button id="inspectBtn" class="btn btn-primary">
+            <span id="inspectBtnText">Inspect Video</span>
+          </button>
+        </div>
+
+        <div class="sample-urls">
+          <span class="sample-label">Quick Samples:</span>
+          <button class="chip-btn" data-url="https://www.youtube.com/watch?v=dQw4w9WgXcQ">🎵 Never Gonna Give You Up</button>
+          <button class="chip-btn" data-url="https://www.youtube.com/watch?v=jNQXAC9IVRw">🎥 First Video on YouTube</button>
+          <button class="chip-btn" data-url="https://www.youtube.com/watch?v=9bZkp7q19f0">🔥 Gangnam Style</button>
+        </div>
+      </section>
+
+      <!-- Section 2: Video Preview & Metadata -->
+      <section id="previewSection" class="glass-card video-preview-grid" style="display: none;">
+        <div class="player-wrapper">
+          <div id="ytPlayerContainer"></div>
+        </div>
+
+        <div class="video-meta-card">
+          <div>
+            <h2 id="videoTitle" class="video-info-title">Video Title</h2>
+            <div id="videoChannel" class="video-info-channel" style="margin-top: 0.4rem;">Channel Name</div>
+          </div>
+
+          <div class="meta-stats">
+            <div class="meta-stat-item">
+              <span>⏱ Total:</span>
+              <strong id="videoDurationText">00:00</strong>
+            </div>
+            <div class="meta-stat-item">
+              <span>👁 Views:</span>
+              <strong id="videoViewsText">0</strong>
+            </div>
+          </div>
+
+          <p id="videoDescription" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"></p>
+        </div>
+      </section>
+
+      <!-- Section 3: Timeline & Precision Trimmer -->
+      <section id="trimmerSection" class="glass-card timeline-card" style="display: none;">
+        <div class="section-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="6" cy="6" r="3"></circle>
+            <circle cx="6" cy="18" r="3"></circle>
+            <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+            <line x1="14.47" y1="14.47" x2="20" y2="20"></line>
+            <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+          </svg>
+          Step 2: Trim Time Range
+        </div>
+
+        <!-- Visual Scrubber Bar -->
+        <div class="timeline-wrapper">
+          <div class="timeline-track-container" id="timelineTrack">
+            <div class="timeline-bg-bar"></div>
+            <div class="timeline-selected-range" id="selectedRange"></div>
+            <div class="timeline-playhead" id="timelinePlayhead"></div>
+          </div>
+
+          <div class="range-slider-group">
+            <input type="range" id="startRange" min="0" max="100" value="0" step="0.5">
+            <input type="range" id="endRange" class="range-end" min="0" max="100" value="60" step="0.5">
+          </div>
+        </div>
+
+        <!-- Precision Time Controls -->
+        <div class="time-inputs-grid">
+          <!-- Start Time Box -->
+          <div class="time-box start">
+            <div class="time-box-header">
+              <span class="time-box-title">Start Cut Time</span>
+              <button id="setStartCurBtn" class="chip-btn">📍 Set to Player Position</button>
+            </div>
+            <div class="time-input-row">
+              <input type="text" id="startTimeInput" value="00:00">
+              <div class="step-btns">
+                <button id="startSub5" class="step-btn">-5s</button>
+                <button id="startSub1" class="step-btn">-1s</button>
+                <button id="startAdd1" class="step-btn">+1s</button>
+                <button id="startAdd5" class="step-btn">+5s</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- End Time Box -->
+          <div class="time-box end">
+            <div class="time-box-header">
+              <span class="time-box-title">End Cut Time</span>
+              <button id="setEndCurBtn" class="chip-btn">📍 Set to Player Position</button>
+            </div>
+            <div class="time-input-row">
+              <input type="text" id="endTimeInput" value="01:00">
+              <div class="step-btns">
+                <button id="endSub5" class="step-btn">-5s</button>
+                <button id="endSub1" class="step-btn">-1s</button>
+                <button id="endAdd1" class="step-btn">+1s</button>
+                <button id="endAdd5" class="step-btn">+5s</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Presets & Preview Action Bar -->
+        <div class="presets-bar">
+          <div class="preset-group">
+            <span style="font-size: 0.8rem; color: var(--text-dim);">Quick Presets:</span>
+            <button id="preset30s" class="preset-chip">First 30s</button>
+            <button id="preset1m" class="preset-chip">First 1 min</button>
+            <button id="presetMid" class="preset-chip">Middle 2 mins</button>
+            <button id="presetFull" class="preset-chip">Full Video</button>
+          </div>
+
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <button id="playSegmentBtn" class="btn btn-secondary btn-sm">
+              ▶ Preview Selected Clip
+            </button>
+            <div id="clipDurationPill" class="clip-duration-pill">
+              Clip Length: 01:00 (60s)
+            </div>
+          </div>
+        </div>
+
+        <!-- Quality Options & Download Button -->
+        <div class="options-bar">
+          <div class="options-group">
+            <div class="option-control">
+              <span class="option-label">Container Format</span>
+              <select id="formatSelect" class="select-input">
+                <option value="mp4" selected>MP4 (Video + Audio)</option>
+                <option value="mp3">MP3 (Audio Only)</option>
+                <option value="webm">WEBM</option>
+                <option value="mkv">MKV</option>
+              </select>
+            </div>
+
+            <div class="option-control">
+              <span class="option-label">Resolution / Quality</span>
+              <select id="qualitySelect" class="select-input">
+                <option value="best" selected>Best Available Quality</option>
+                <option value="1080">1080p Full HD</option>
+                <option value="720">720p HD</option>
+                <option value="480">480p SD</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="downloadBtn" class="btn download-action-btn btn-primary">
+            ⚡ Download Trimmed Clip
+          </button>
+        </div>
+      </section>
+
+      <!-- Section 4: Live Progress Terminal Card (shows during download) -->
+      <section id="progressCard" class="glass-card progress-card" style="display: none;">
+        <div class="progress-header">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h3 style="font-size: 1.1rem; font-weight: 700;">Download Status</h3>
+            <span id="progressBadge" class="progress-status-badge downloading">Downloading</span>
+          </div>
+          <button id="toggleTerminalBtn" class="btn btn-secondary btn-sm">
+            Console Logs ▾
+          </button>
+          <button id="cancelDownloadBtn" class="btn btn-danger btn-sm" type="button" hidden>
+            Stop Download
+          </button>
+        </div>
+
+        <div class="progress-bar-container">
+          <div id="progressBarFill" class="progress-bar-fill"></div>
+        </div>
+
+        <div class="progress-stats-row">
+          <span>Speed: <strong id="progressSpeed">-</strong></span>
+          <span>ETA: <strong id="progressEta">-</strong></span>
+          <span>Progress: <strong id="progressPct">0%</strong></span>
+        </div>
+
+        <!-- Terminal Console Box -->
+        <div id="terminalConsole" class="terminal-box" style="display: none;">
+          <div class="terminal-line" style="color: #64748b;">[System] Subprocess execution started...</div>
+        </div>
+      </section>
+
+      <!-- Section 5: Gallery of Downloaded Clips -->
+      <section class="gallery-section">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
+            <span>📂 Downloaded Clips</span>
+            <span id="clipsCountBadge" style="font-size: 0.8rem; background: rgba(255,255,255,0.08); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-weight: 600;">0 clips</span>
+          </h2>
+          <button id="refreshClipsBtn" class="btn btn-secondary btn-sm">🔄 Refresh List</button>
+        </div>
+
+        <div id="clipsGrid" class="clips-grid">
+          <!-- Dynamically populated clips -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- App Script Dependencies -->
+  <script src="/js/api.js"></script>
+  <script src="/js/yt-player.js"></script>
+  <script src="/js/timeline.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>

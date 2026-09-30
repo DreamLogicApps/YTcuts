@@ -20,7 +20,7 @@ Set `BUYMEACOFFEE_MODE=demo` to use the local integration test. Clicking **Suppo
 
    The same placeholder values are available in `.env.example`. The application intentionally does not load `.env` files automatically, so export the values in the process that launches YT Cuts.
 
-4. For a packaged executable, set the same environment variable in the process or launcher that starts the executable. Do not commit it to source control if the URL contains private or campaign-specific information.
+4. Set the same environment variable in the shell that starts YT Cuts. Do not commit private or campaign-specific credentials to source control; the public Buy Me a Coffee profile URL is safe to include as the default.
 
 The application uses a normal external link. It does not embed payment scripts, collect payment details, call the Buy Me a Coffee API, receive webhooks, store supporter records, or expose payment credentials. Buy Me a Coffee handles the checkout, payment processing, receipts, and payout workflow according to its current requirements and policies.
 

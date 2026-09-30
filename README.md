@@ -41,27 +41,26 @@ The Python dependency `static-ffmpeg` supplies ffmpeg binaries automatically, so
 
 ## Installation
 
-Open a terminal in the project directory:
+Clone the repository and enter the project directory:
 
-```powershell
-cd "D:\SaaS\YT Cuts"
+```bash
+git clone https://github.com/DreamLogicApps/YTcuts.git
+cd YTcuts
 ```
 
-Create a virtual environment:
+Create and activate a virtual environment.
+
+Windows PowerShell:
 
 ```powershell
 python -m venv .venv
-```
-
-Activate it on Windows PowerShell:
-
-```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-On macOS or Linux:
+macOS or Linux:
 
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
 ```
 
@@ -74,10 +73,10 @@ python -m pip install -r requirements.txt
 
 ## Running the App
 
-From the project directory, run:
+With the virtual environment active, run:
 
-```powershell
-.\.venv\Scripts\python.exe run.py
+```bash
+python run.py
 ```
 
 The server starts at:
@@ -96,7 +95,7 @@ The launcher enables automatic reload during development. Stop the server with `
 
 ## Deployment
 
-The current application is designed for local use. See [Deployment](docs/DEPLOYMENT.md) before using Vercel: Vercel can host the static frontend, but the current download backend requires a persistent Python service with FFmpeg, writable storage, background jobs, and SSE support.
+The current application is designed for local use. See [Deployment](docs/DEPLOYMENT.md) for the local runtime model and its security boundary.
 
 ## Project Structure
 
@@ -168,9 +167,9 @@ Completed files are saved in the `downloads/` directory. The directory is create
 
 Make sure the virtual environment exists and dependencies are installed:
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe run.py
+```bash
+python -m pip install -r requirements.txt
+python run.py
 ```
 
 ### A preview does not appear
@@ -185,8 +184,8 @@ The app downloads concurrent media fragments and avoids forced keyframe re-encod
 
 Check the live console output in the progress card. YouTube changes can occasionally require a newer yt-dlp version:
 
-```powershell
-.\.venv\Scripts\python.exe -m pip install --upgrade yt-dlp
+```bash
+python -m pip install --upgrade yt-dlp
 ```
 
 ## Legal and Responsible Use
@@ -194,3 +193,5 @@ Check the live console output in the progress card. YouTube changes can occasion
 Only download and edit videos you have permission to use. Respect YouTube's Terms of Service, copyright law, creator rights, and any access restrictions that apply to the content.
 
 Read the current [Terms of Use](docs/TERMS.md), [Privacy Policy](docs/PRIVACY.md), [Disclaimer](docs/DISCLAIMER.md), [Refund and Cancellation Policy](docs/REFUND-CANCELLATION.md), and [support contribution notice](docs/SUPPORT-CONTRIBUTIONS.md). These documents describe the free open-source model and optional third-party checkout; obtain qualified legal and tax review before accepting contributions commercially.
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and pull request checks.

@@ -1,18 +1,13 @@
 # Deployment
 
-YT Cuts is currently a local web application, not a serverless web application.
+YT Cuts is intentionally a local web application. Clone the repository, install its dependencies, and run the FastAPI server on the same computer that will process and store clips.
 
-## Vercel limitation
+The current architecture depends on `yt-dlp`, FFmpeg subprocesses, writable local storage, in-memory task state, background jobs, and Server-Sent Events. It is not packaged as a hosted or serverless service. Keep the server bound to `127.0.0.1` unless you add authentication, authorization, HTTPS, durable storage, per-user ownership, and rate limiting.
 
-Vercel can host the static interface, but it cannot host the complete current application reliably. The backend uses `yt-dlp` and FFmpeg subprocesses, local clip storage, in-memory task state, background work, and Server-Sent Events. Vercel functions are ephemeral and request-limited, and their filesystem is not persistent storage. Deploying the current backend there would make downloads and the clip gallery unreliable.
+The supported runtime is:
 
-Do not deploy the current repository as a Vercel-only application and assume the download workflow works.
+```bash
+python run.py
+```
 
-## Recommended production shape
-
-- Host the `static/` frontend on Vercel or another static host.
-- Host the FastAPI backend on a persistent service or VM with Python, FFmpeg, writable storage, and a process model that supports the download jobs.
-- Configure the frontend API base URL for that backend and configure backend CORS for the deployed frontend origin before exposing it beyond localhost.
-- Move completed media to durable object storage before serving this as a multi-user service. Add authentication, per-user ownership, rate limits, and persistent job state first.
-
-The current `run.py` workflow remains the supported local development path. This limitation is architectural, not a missing Vercel configuration file.
+Then open `http://127.0.0.1:8000` in the browser on that computer.

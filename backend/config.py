@@ -12,6 +12,12 @@ else:
 
 DOWNLOADS_DIR = APP_DATA_DIR / "downloads"
 
+MAX_CONCURRENT_DOWNLOADS = 2
+MAX_CLIP_SECONDS = 4 * 60 * 60
+MAX_TASK_LOGS = 200
+TASK_RETENTION_SECONDS = 60 * 60
+MAX_STORAGE_BYTES = 50 * 1024 * 1024 * 1024
+
 # Ensure downloads directory exists
 DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)
 

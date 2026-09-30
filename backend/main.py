@@ -8,18 +8,18 @@ from backend.config import BASE_DIR, DOWNLOADS_DIR
 from backend.routes import info, download, files
 
 app = FastAPI(
-    title="YouTube Trimmer",
-    description="Local YouTube Video Trimmer powered by FastAPI and yt-dlp",
+    title="YT Cuts",
+    description="Local YouTube clip editor powered by FastAPI and yt-dlp",
     version="1.0.0"
 )
 
-# CORS setup for localhost access
+# The app is intentionally local-only. Keep browser access limited to its own UI.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["http://127.0.0.1:8000", "http://localhost:8000"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type"],
 )
 
 # Include API routes
@@ -38,6 +38,6 @@ if STATIC_DIR.exists():
 @app.on_event("startup")
 async def startup_event():
     print("====================================================")
-    print("  YouTube Trimmer Backend initialized successfully!")
+    print("  YT Cuts backend initialized successfully!")
     print(f"  Downloads directory: {DOWNLOADS_DIR.resolve()}")
     print("====================================================")

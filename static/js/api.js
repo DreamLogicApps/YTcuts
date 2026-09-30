@@ -1,5 +1,5 @@
 /**
- * API Service for YouTube Trimmer Backend
+ * API Service for YT Cuts Backend
  */
 const API = {
   /**
@@ -51,7 +51,7 @@ const API = {
       try {
         const data = JSON.parse(event.data);
         onMessage(data);
-        if (data.status === 'completed' || data.status === 'failed') {
+        if (['completed', 'failed', 'cancelled'].includes(data.status)) {
           eventSource.close();
         }
       } catch (err) {

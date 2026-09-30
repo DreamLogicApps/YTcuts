@@ -1,8 +1,8 @@
-# YT Trimmer
+# YT Cuts
 
-YT Trimmer is a local YouTube clip editor and downloader. It lets you inspect a YouTube video, choose a time range, preview the selected section, and save the clip locally as MP4, WebM, MKV, or MP3.
+YT Cuts is a local YouTube clip editor and downloader. It lets you inspect a YouTube video, choose a time range, preview the selected section, and save the clip locally as MP4, WebM, MKV, or MP3.
 
-The application runs on your own computer. The FastAPI backend uses `yt-dlp` to retrieve video information and download the selected section, while the browser provides the trimming controls and live progress display.
+The application runs on your own computer and is intended for one local user. The FastAPI backend uses `yt-dlp` to retrieve video information and download the selected section, while the browser provides the trimming controls and live progress display. The app is not a public hosted service and must remain bound to localhost unless it is separately hardened.
 
 ## Features
 
@@ -13,7 +13,7 @@ The application runs on your own computer. The FastAPI backend uses `yt-dlp` to 
 - Quick presets for common clip lengths
 - MP4, WebM, MKV, and MP3 output options
 - Selectable video quality, including best available, 1080p, 720p, and 480p when available
-- Concurrent media fragment downloads for improved speed
+- Bounded concurrent media fragment downloads for improved speed
 - Live download progress, speed, ETA, and subprocess logs
 - Stop an active download and remove partial files
 - Local downloaded-clip gallery with file size and delete controls
@@ -91,7 +91,7 @@ Open that address in your browser. FastAPI API documentation is available at:
 http://127.0.0.1:8000/docs
 ```
 
-The launcher enables automatic reload during development. Stop the server with `Ctrl+C`.
+The launcher enables automatic reload during development and disables it in the frozen executable. Stop the server with `Ctrl+C`.
 
 ## Windows Portable Executable
 
@@ -161,6 +161,12 @@ Example download request:
 }
 ```
 
+## Security Model
+
+The current release has no accounts, authentication, authorization, database, telemetry, payment processing, or remote job service. The local API and downloaded files are intentionally available to the local browser. Do not bind the server to a LAN or public interface. Request validation restricts media sources to YouTube, and local storage and active jobs are bounded, but this is not a multi-user security model.
+
+See the [security audit](SECURITY-AUDIT.md) for completed hardening and remaining release gates.
+
 ## Output Files
 
 Completed files are saved in the `downloads/` directory. The directory is created automatically when the backend starts. Downloaded media and the local virtual environment are intentionally ignored by Git.
@@ -195,3 +201,5 @@ Check the live console output in the progress card. YouTube changes can occasion
 ## Legal and Responsible Use
 
 Only download and edit videos you have permission to use. Respect YouTube's Terms of Service, copyright law, creator rights, and any access restrictions that apply to the content.
+
+Read the current [Terms of Use](docs/TERMS.md), [Privacy Policy](docs/PRIVACY.md), [Disclaimer](docs/DISCLAIMER.md), and [Refund and Cancellation Policy](docs/REFUND-CANCELLATION.md). These documents describe this local, currently unpaid version and require qualified legal review before commercial distribution, network exposure, or payment functionality.

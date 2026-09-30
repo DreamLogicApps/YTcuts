@@ -1,5 +1,5 @@
 /**
- * Main Application Orchestrator for YouTube Trimmer
+ * Main Application Orchestrator for YT Cuts
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -39,11 +39,31 @@ document.addEventListener('DOMContentLoaded', () => {
   const clipsCountBadge = document.getElementById('clipsCountBadge');
   const refreshClipsBtn = document.getElementById('refreshClipsBtn');
   const totalStorageDisplay = document.getElementById('totalStorageDisplay');
+  const themeToggle = document.getElementById('themeToggle');
 
   // State
   let currentVideoMetadata = null;
   let activeEventSource = null;
   let activeTaskId = null;
+
+  const savedTheme = localStorage.getItem('yt-cuts-theme') || 'dark';
+  document.documentElement.dataset.theme = savedTheme;
+
+  function updateThemeToggle() {
+    const isLight = document.documentElement.dataset.theme === 'light';
+    themeToggle.setAttribute('aria-pressed', String(isLight));
+    themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
+    themeToggle.querySelector('.theme-toggle-icon').textContent = isLight ? '☾' : '☼';
+    themeToggle.querySelector('.theme-toggle-label').textContent = isLight ? 'Dark mode' : 'Light mode';
+  }
+
+  updateThemeToggle();
+  themeToggle.addEventListener('click', () => {
+    const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.theme = nextTheme;
+    localStorage.setItem('yt-cuts-theme', nextTheme);
+    updateThemeToggle();
+  });
 
   // Initialize YouTube Player Manager
   const ytPlayer = new YTPlayerManager('ytPlayerContainer', (currentTime) => {
@@ -59,6 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const timeline = new TimelineController({
     startRangeId: 'startRange',
     endRangeId: 'endRange',
+    trackId: 'timelineTrack',
     startTimeInputId: 'startTimeInput',
     endTimeInputId: 'endTimeInput',
     selectedRangeId: 'selectedRange',
@@ -383,9 +404,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const card = document.createElement('div');
         card.className = 'clip-card';
 
-        const mediaTag = file.is_audio 
-          ? `<audio controls class="clip-media-preview" src="${file.download_url}"></audio>`
-          : `<video controls class="clip-media-preview" src="${file.download_url}" preload="metadata"></video>`;
+        const safeUrl = escapeHtml(file.download_url);
+        const safeFilename = escapeHtml(file.filename);
+        const mediaTag = file.is_audio
+          ? `<audio controls class="clip-media-preview" src="${safeUrl}"></audio>`
+          : `<video controls class="clip-media-preview" src="${safeUrl}" preload="metadata"></video>`;
 
         const createdDate = new Date(file.created_at * 1000).toLocaleString();
 
@@ -401,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ${mediaTag}
 
           <div class="clip-actions">
-            <a href="${file.download_url}" download="${file.filename}" class="btn btn-secondary btn-sm" style="flex: 1; text-decoration: none;">
+            <a href="${safeUrl}" download="${safeFilename}" class="btn btn-secondary btn-sm" style="flex: 1; text-decoration: none;">
               ⬇ Save File
             </a>
             <button class="btn btn-danger btn-sm btn-icon-only delete-clip-btn" data-filename="${file.filename}" title="Delete Clip">
@@ -440,6 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 });

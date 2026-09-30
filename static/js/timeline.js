@@ -41,6 +41,7 @@ class TimelineController {
     this.selectedRangeEl = document.getElementById(options.selectedRangeId);
     this.playheadEl = document.getElementById(options.playheadId);
     this.clipDurationEl = document.getElementById(options.clipDurationId);
+    this.timelineTrack = document.getElementById(options.trackId);
     
     this.totalDuration = 100; // default max seconds
     this.onRangeChange = options.onRangeChange;
@@ -52,11 +53,43 @@ class TimelineController {
     this.totalDuration = Math.max(1, duration);
     this.startRangeInput.max = this.totalDuration;
     this.endRangeInput.max = this.totalDuration;
+    this.renderTimeMarkers();
 
     // Reset default start to 0 and end to total duration or 60s
     this.setStart(0);
     this.setEnd(Math.min(this.totalDuration, 60));
     this.updateUI();
+  }
+
+  getMarkerInterval() {
+    if (this.totalDuration <= 60) return 5;
+    if (this.totalDuration <= 300) return 15;
+    if (this.totalDuration <= 900) return 30;
+    if (this.totalDuration <= 3600) return 60;
+    return Math.ceil(this.totalDuration / 12 / 60) * 60;
+  }
+
+  renderTimeMarkers() {
+    if (!this.timelineTrack) return;
+
+    const oldMarkers = this.timelineTrack.querySelector('.timeline-markers');
+    if (oldMarkers) oldMarkers.remove();
+
+    const markers = document.createElement('div');
+    markers.className = 'timeline-markers';
+    const interval = this.getMarkerInterval();
+
+    for (let seconds = 0; seconds <= this.totalDuration; seconds += interval) {
+      const marker = document.createElement('span');
+      marker.className = 'timeline-marker';
+      marker.style.left = `${(seconds / this.totalDuration) * 100}%`;
+      if (seconds === 0 || seconds + interval >= this.totalDuration || seconds % (interval * 2) === 0) {
+        marker.classList.add('major');
+      }
+      markers.appendChild(marker);
+    }
+
+    this.timelineTrack.appendChild(markers);
   }
 
   getStart() {

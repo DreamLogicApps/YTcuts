@@ -18,7 +18,7 @@ if __name__ == "__main__":
     is_frozen = getattr(sys, "frozen", False)
     app_url = "http://127.0.0.1:8000"
     print("=========================================================")
-    print(f"  YouTube Trimmer Local App starting on {app_url}")
+    print(f"  YT Cuts local app starting on {app_url}")
     print("=========================================================")
     if is_frozen:
         threading.Timer(1.0, lambda: webbrowser.open(app_url)).start()

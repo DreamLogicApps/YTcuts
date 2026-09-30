@@ -5,12 +5,30 @@ import sys
 import subprocess
 import uuid
 import traceback
+import shutil
+import time
 from pathlib import Path
 from typing import Dict, Any, AsyncGenerator, Optional
-from backend.config import BASE_DIR, DOWNLOADS_DIR
+from backend.config import (
+    BASE_DIR,
+    DOWNLOADS_DIR,
+    MAX_CONCURRENT_DOWNLOADS,
+    MAX_STORAGE_BYTES,
+    MAX_TASK_LOGS,
+    TASK_RETENTION_SECONDS,
+)
 
 # Global task state storage for streaming progress
 active_tasks: Dict[str, Dict[str, Any]] = {}
+download_semaphore = asyncio.Semaphore(MAX_CONCURRENT_DOWNLOADS)
+
+
+def prune_tasks() -> None:
+    cutoff = time.time() - TASK_RETENTION_SECONDS
+    for task_id, entry in list(active_tasks.items()):
+        task = entry["task_obj"]
+        if task.status in {"completed", "failed", "cancelled"} and entry.get("finished_at", 0) < cutoff:
+            active_tasks.pop(task_id, None)
 
 def get_python_exe() -> str:
     """Return path to virtualenv python executable if it exists, else sys.executable."""
@@ -54,6 +72,8 @@ def _execute_yt_dlp_sync(cmd: list, task_obj) -> int:
     task_obj.process = proc
 
     for line in proc.stdout:
+        if task_obj.cancel_requested:
+            break
         clean_line = line.strip()
         if clean_line:
             task_obj.log(clean_line)
@@ -80,6 +100,8 @@ class DownloadTask:
         self.quality = quality
         self.output_format = output_format
         self.custom_title = custom_title
+        self.task_dir = DOWNLOADS_DIR / ".tasks" / self.task_id
+        self.task_dir.mkdir(parents=True, exist_ok=True)
         
         self.status = "queued" # queued, downloading, merging, completed, failed
         self.progress = 0.0
@@ -96,6 +118,26 @@ class DownloadTask:
         clean_msg = message.strip()
         if clean_msg:
             self.logs.append(clean_msg)
+            del self.logs[:-MAX_TASK_LOGS]
+
+    @staticmethod
+    def parse_time(value: Any) -> float:
+        text = str(value).strip()
+        if re.fullmatch(r"\d+(?:\.\d+)?", text):
+            return float(text)
+        parts = text.split(":")
+        if len(parts) not in {2, 3} or any(not re.fullmatch(r"\d+(?:\.\d+)?", part) for part in parts):
+            raise ValueError("Times must use seconds or HH:MM:SS format.")
+        numbers = [float(part) for part in parts]
+        if len(numbers) == 2:
+            minutes, seconds = numbers
+            if seconds >= 60:
+                raise ValueError("Seconds must be less than 60.")
+            return minutes * 60 + seconds
+        hours, minutes, seconds = numbers
+        if minutes >= 60 or seconds >= 60:
+            raise ValueError("Minutes and seconds must be less than 60.")
+        return hours * 3600 + minutes * 60 + seconds
 
     def cancel(self) -> bool:
         """Terminate the yt-dlp process and mark this task for cancellation."""
@@ -117,7 +159,7 @@ class DownloadTask:
         return True
 
     def remove_partial_files(self):
-        for path in DOWNLOADS_DIR.glob("*"):
+        for path in self.task_dir.glob("*"):
             if path.name.endswith((".part", ".ytdl")):
                 try:
                     path.unlink()
@@ -129,6 +171,7 @@ class DownloadTask:
             self.status = "cancelled"
             self.error_message = "Download cancelled"
             self.log("Download cancelled before it started.")
+            active_tasks.get(self.task_id, {})["finished_at"] = time.time()
             return
 
         self.status = "downloading"
@@ -136,7 +179,7 @@ class DownloadTask:
 
         # Build output template path according to prompt pattern:
         # downloads/%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s
-        output_template = str(DOWNLOADS_DIR / "%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s")
+        output_template = str(self.task_dir / "%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s")
 
         # Format spec logic
         if self.output_format.lower() == "mp3":
@@ -168,10 +211,19 @@ class DownloadTask:
 
         cmd.append(self.url)
 
-        self.log(f"Executing command: {' '.join(cmd)}")
+        self.log("Executing yt-dlp download command.")
 
         try:
-            existing_files = set(DOWNLOADS_DIR.glob("*"))
+            used_bytes = sum(path.stat().st_size for path in DOWNLOADS_DIR.rglob("*") if path.is_file())
+            if used_bytes >= MAX_STORAGE_BYTES:
+                self.status = "failed"
+                self.error_message = "Local clip storage is full. Delete older clips and try again."
+                self.log(self.error_message)
+                shutil.rmtree(self.task_dir, ignore_errors=True)
+                active_tasks.get(self.task_id, {})["finished_at"] = time.time()
+                return
+
+            existing_files = set(self.task_dir.glob("*"))
 
             # Execute in thread pool to ensure Windows compatibility across all asyncio event loops
             rc = await asyncio.to_thread(_execute_yt_dlp_sync, cmd, self)
@@ -184,20 +236,25 @@ class DownloadTask:
             elif rc == 0:
                 self.status = "completed"
                 self.progress = 100.0
-                current_files = set(DOWNLOADS_DIR.glob("*"))
-                new_files = [f for f in current_files - existing_files if not f.name.endswith((".part", ".ytdl"))]
+                current_files = set(self.task_dir.glob("*"))
+                new_files = [f for f in current_files - existing_files if f.is_file() and not f.name.endswith((".part", ".ytdl"))]
                 
                 if new_files:
                     newest = max(new_files, key=lambda f: f.stat().st_mtime)
-                    self.filepath = str(newest)
-                    self.filename = newest.name
+                    final_path = DOWNLOADS_DIR / f"{self.task_id}_{newest.name}"
+                    shutil.move(str(newest), final_path)
+                    self.filepath = str(final_path)
+                    self.filename = final_path.name
                 else:
-                    recent_files = sorted([f for f in DOWNLOADS_DIR.glob("*") if f.is_file() and not f.name.endswith((".part", ".ytdl"))], key=lambda f: f.stat().st_mtime, reverse=True)
-                    if recent_files:
-                        self.filepath = str(recent_files[0])
-                        self.filename = recent_files[0].name
+                    self.status = "failed"
+                    self.error_message = "Download completed without producing a clip."
+                    self.log(self.error_message)
+                    shutil.rmtree(self.task_dir, ignore_errors=True)
+                    active_tasks.get(self.task_id, {})["finished_at"] = time.time()
+                    return
 
                 self.log(f"Clip successfully created: {self.filename}")
+                shutil.rmtree(self.task_dir, ignore_errors=True)
             else:
                 self.status = "failed"
                 self.error_message = f"yt-dlp exited with code {rc}"
@@ -213,7 +270,9 @@ class DownloadTask:
                 self.status = "failed"
                 self.error_message = f"{type(e).__name__}: {str(e)}"
                 self.log(f"Exception encountered: {self.error_message}")
-                self.log(traceback.format_exc())
+                print(traceback.format_exc())
+
+            active_tasks.get(self.task_id, {})["finished_at"] = time.time()
 
     def parse_progress_line(self, line: str):
         """Parse progress percentage, speed, and ETA from yt-dlp output line."""
@@ -263,7 +322,7 @@ async def subscribe_task_progress(task_id: str) -> AsyncGenerator[str, None]:
         import json
         yield f"data: {json.dumps(event_data)}\n\n"
 
-        if task["task_obj"].status in ["completed", "failed"]:
+        if task["task_obj"].status in ["completed", "failed", "cancelled"]:
             break
 
         await asyncio.sleep(0.5)

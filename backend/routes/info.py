@@ -15,4 +15,4 @@ async def fetch_info(url: str = Query(..., description="YouTube video URL")):
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Unable to fetch video information right now.") from e

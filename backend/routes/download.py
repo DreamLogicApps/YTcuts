@@ -1,23 +1,45 @@
 import asyncio
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel, Field
-from backend.downloader import DownloadTask, active_tasks, subscribe_task_progress
+from pydantic import BaseModel, Field, field_validator, model_validator
+from backend.config import MAX_CLIP_SECONDS, MAX_CONCURRENT_DOWNLOADS
+from backend.downloader import DownloadTask, active_tasks, download_semaphore, prune_tasks, subscribe_task_progress
+from backend.metadata import validate_youtube_url
 
 router = APIRouter()
 
 class DownloadRequest(BaseModel):
-    url: str = Field(..., description="YouTube video URL")
-    start_time: str = Field(..., description="Start time (e.g. '00:01:00' or seconds)")
-    end_time: str = Field(..., description="End time (e.g. '00:02:30' or seconds)")
-    quality: str = Field(default="best", description="Quality selection")
-    output_format: str = Field(default="mp4", description="Output container format (mp4, mp3, webm, mkv)")
+    url: str = Field(..., min_length=1, max_length=2048, description="YouTube video URL")
+    start_time: str = Field(..., min_length=1, max_length=32, description="Start time")
+    end_time: str = Field(..., min_length=1, max_length=32, description="End time")
+    quality: str = Field(default="best", pattern=r"^(best|audio|(?:144|240|360|480|720|1080|1440|2160))$")
+    output_format: str = Field(default="mp4", pattern=r"^(mp4|mp3|webm|mkv)$")
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, value: str) -> str:
+        return validate_youtube_url(value)
+
+    @model_validator(mode="after")
+    def validate_times(self):
+        start = DownloadTask.parse_time(self.start_time)
+        end = DownloadTask.parse_time(self.end_time)
+        if start < 0 or end <= start:
+            raise ValueError("End time must be greater than start time.")
+        if end > MAX_CLIP_SECONDS:
+            raise ValueError(f"Clip length cannot exceed {MAX_CLIP_SECONDS // 3600} hours.")
+        return self
 
 @router.post("/download")
 async def start_download(req: DownloadRequest, background_tasks: BackgroundTasks):
     """Start downloading a trimmed clip segment."""
-    if not req.url or not req.url.strip():
-        raise HTTPException(status_code=400, detail="URL is required")
+    prune_tasks()
+    active_count = sum(
+        item["task_obj"].status not in {"completed", "failed", "cancelled"}
+        for item in active_tasks.values()
+    )
+    if active_count >= MAX_CONCURRENT_DOWNLOADS:
+        raise HTTPException(status_code=429, detail="The maximum number of active downloads has been reached.")
 
     task = DownloadTask(
         url=req.url.strip(),
@@ -31,14 +53,18 @@ async def start_download(req: DownloadRequest, background_tasks: BackgroundTasks
         "task_obj": task
     }
 
-    # Run the download task asynchronously in background
-    background_tasks.add_task(task.run)
+    background_tasks.add_task(run_bounded_download, task)
 
     return {
         "success": True,
         "task_id": task.task_id,
         "message": f"Download task initiated for clip {task.start_time} to {task.end_time}"
     }
+
+
+async def run_bounded_download(task: DownloadTask):
+    async with download_semaphore:
+        await task.run()
 
 @router.get("/download/progress/{task_id}")
 async def get_progress_stream(task_id: str):

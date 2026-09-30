@@ -178,7 +178,7 @@ Some YouTube videos disable third-party embedding, require authentication, are a
 
 ### Downloads are slow
 
-The app downloads concurrent media fragments and avoids forced keyframe re-encoding for faster processing. Selecting 720p or 480p instead of the best available quality can reduce download and merge time substantially.
+The app downloads concurrent media fragments and forces precise keyframe re-encoding at the cut boundaries to guarantee perfect audio/video synchronization. Selecting 720p or 480p instead of the best available quality can reduce download and merge time substantially.
 
 ### A download fails
 

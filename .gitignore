@@ -1,4 +1,8 @@
 .venv/
+build/
+dist/
+release/
+*.zip
 **/__pycache__/
 *.py[cod]
 downloads/*

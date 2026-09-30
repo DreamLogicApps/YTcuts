@@ -1,9 +1,16 @@
 import os
+import sys
 from pathlib import Path
 
 # Base directories
-BASE_DIR = Path(__file__).resolve().parent.parent
-DOWNLOADS_DIR = BASE_DIR / "downloads"
+if getattr(sys, "frozen", False):
+    BASE_DIR = Path(getattr(sys, "_MEIPASS", Path(sys.executable).resolve().parent))
+    APP_DATA_DIR = Path(sys.executable).resolve().parent
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    APP_DATA_DIR = BASE_DIR
+
+DOWNLOADS_DIR = APP_DATA_DIR / "downloads"
 
 # Ensure downloads directory exists
 DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)

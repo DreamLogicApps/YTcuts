@@ -93,6 +93,26 @@ http://127.0.0.1:8000/docs
 
 The launcher enables automatic reload during development. Stop the server with `Ctrl+C`.
 
+## Windows Portable Executable
+
+A Windows executable can be built with PyInstaller. From PowerShell:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install pyinstaller
+.\.venv\Scripts\pyinstaller.exe --clean --noconfirm YTTrimmer.spec
+```
+
+The executable is created at `dist\YTTrimmer.exe`. Copy or zip that file to share it with another Windows computer. Double-clicking it starts the local server and opens the app in the default browser at `http://127.0.0.1:8000`.
+
+The executable is portable and does not need Python installed on the target computer. It creates a `downloads` folder beside the executable for completed clips. Internet access is still required for YouTube metadata and downloads.
+
+To rebuild the distribution using the included script:
+
+```powershell
+.\build_windows.ps1
+```
+
 ## Project Structure
 
 ```text
@@ -112,20 +132,22 @@ YT Cuts/
 │   ├── css/style.css          Theme and responsive layout
 │   └── js/                    Frontend API, player, timeline, and app logic
 ├── requirements.txt           Python dependencies
-└── run.py                     Development server entry point
+├── run.py                     Development server entry point
+├── YTTrimmer.spec             PyInstaller packaging configuration
+└── build_windows.ps1          Windows build and ZIP script
 ```
 
 ## API Endpoints
 
-| Method | Endpoint | Purpose |
-| --- | --- | --- |
-| `GET` | `/api/info?url=...` | Retrieve metadata for a YouTube URL |
-| `POST` | `/api/download` | Start a trimmed clip download |
-| `GET` | `/api/download/progress/{task_id}` | Stream live progress with Server-Sent Events |
-| `GET` | `/api/download/status/{task_id}` | Retrieve current task status |
-| `POST` | `/api/download/{task_id}/cancel` | Stop an active download |
-| `GET` | `/api/files` | List completed local clips |
-| `DELETE` | `/api/files/{filename}` | Delete a local clip |
+| Method   | Endpoint                           | Purpose                                      |
+| -------- | ---------------------------------- | -------------------------------------------- |
+| `GET`    | `/api/info?url=...`                | Retrieve metadata for a YouTube URL          |
+| `POST`   | `/api/download`                    | Start a trimmed clip download                |
+| `GET`    | `/api/download/progress/{task_id}` | Stream live progress with Server-Sent Events |
+| `GET`    | `/api/download/status/{task_id}`   | Retrieve current task status                 |
+| `POST`   | `/api/download/{task_id}/cancel`   | Stop an active download                      |
+| `GET`    | `/api/files`                       | List completed local clips                   |
+| `DELETE` | `/api/files/{filename}`            | Delete a local clip                          |
 
 Example download request:
 

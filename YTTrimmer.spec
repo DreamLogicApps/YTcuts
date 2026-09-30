@@ -15,6 +15,7 @@ analysis = Analysis(
         "backend.routes.download",
         "backend.routes.files",
         "backend.routes.info",
+        "backend.routes.support",
         "uvicorn.logging",
         "uvicorn.loops.auto",
         "uvicorn.protocols.http.auto",

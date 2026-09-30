@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from backend.downloader import DownloadTask
 from backend.metadata import validate_youtube_url
 from backend.routes.download import DownloadRequest
+from backend.routes import support
 
 
 class SecurityBoundaryTests(unittest.TestCase):
@@ -39,6 +40,22 @@ class SecurityBoundaryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             DownloadTask.parse_time("01:60")
         self.assertEqual(DownloadTask.parse_time("01:02:03"), 3723)
+
+    def test_support_url_only_allows_lemon_squeezy_checkout(self):
+        original_url = support.LEMON_SQUEEZY_SUPPORT_URL
+        try:
+            support.LEMON_SQUEEZY_SUPPORT_URL = (
+                "https://yt-cuts.lemonsqueezy.com/checkout/buy/example"
+            )
+            self.assertIsNotNone(support.get_valid_support_url())
+            support.LEMON_SQUEEZY_SUPPORT_URL = "https://example.com/checkout/buy/example"
+            self.assertIsNone(support.get_valid_support_url())
+            support.LEMON_SQUEEZY_SUPPORT_URL = (
+                "http://yt-cuts.lemonsqueezy.com/checkout/buy/example"
+            )
+            self.assertIsNone(support.get_valid_support_url())
+        finally:
+            support.LEMON_SQUEEZY_SUPPORT_URL = original_url
 
 
 if __name__ == "__main__":

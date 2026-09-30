@@ -17,6 +17,7 @@ MAX_CLIP_SECONDS = 4 * 60 * 60
 MAX_TASK_LOGS = 200
 TASK_RETENTION_SECONDS = 60 * 60
 MAX_STORAGE_BYTES = 50 * 1024 * 1024 * 1024
+LEMON_SQUEEZY_SUPPORT_URL = os.getenv("YT_CUTS_SUPPORT_URL", "").strip()
 
 # Ensure downloads directory exists
 DOWNLOADS_DIR.mkdir(parents=True, exist_ok=True)

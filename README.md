@@ -17,6 +17,7 @@ The application runs on your own computer and is intended for one local user. Th
 - Live download progress, speed, ETA, and subprocess logs
 - Stop an active download and remove partial files
 - Local downloaded-clip gallery with file size and delete controls
+- Optional voluntary project support through an external Lemon Squeezy checkout
 - Responsive layout for desktop, tablet, and small mobile screens
 
 ## How It Works
@@ -125,13 +126,15 @@ YT Cuts/
 │   └── routes/
 │       ├── download.py        Download and progress endpoints
 │       ├── files.py           Local clip listing and deletion
-│       └── info.py            Video metadata endpoint
+│       ├── info.py            Video metadata endpoint
+│       └── support.py         Optional hosted support link
 ├── downloads/                 Locally generated clips
 ├── static/
 │   ├── index.html             Web interface
 │   ├── css/style.css          Theme and responsive layout
 │   └── js/                    Frontend API, player, timeline, and app logic
 ├── requirements.txt           Python dependencies
+├── LICENSE                    MIT open-source license
 ├── run.py                     Development server entry point
 ├── YTTrimmer.spec             PyInstaller packaging configuration
 └── build_windows.ps1          Windows build and ZIP script
@@ -148,6 +151,7 @@ YT Cuts/
 | `POST`   | `/api/download/{task_id}/cancel`   | Stop an active download                      |
 | `GET`    | `/api/files`                       | List completed local clips                   |
 | `DELETE` | `/api/files/{filename}`            | Delete a local clip                          |
+| `GET`    | `/api/support`                     | Return the optional support link             |
 
 Example download request:
 
@@ -163,7 +167,11 @@ Example download request:
 
 ## Security Model
 
-The current release has no accounts, authentication, authorization, database, telemetry, payment processing, or remote job service. The local API and downloaded files are intentionally available to the local browser. Do not bind the server to a LAN or public interface. Request validation restricts media sources to YouTube, and local storage and active jobs are bounded, but this is not a multi-user security model.
+The current release has no accounts, authentication, authorization, database, telemetry, payment processing inside the app, or remote job service. The local API and downloaded files are intentionally available to the local browser. Do not bind the server to a LAN or public interface. Request validation restricts media sources to YouTube, and local storage and active jobs are bounded, but this is not a multi-user security model.
+
+YT Cuts is free to use and open source under the [MIT License](LICENSE). The **Support the Project** link is optional, opens a hosted Lemon Squeezy checkout in a new tab, and does not unlock or gate any core functionality. Configure it with `YT_CUTS_SUPPORT_URL`; without that setting, the clearly labeled control remains inactive.
+
+See the [optional support setup](docs/SUPPORT-CONTRIBUTIONS.md) for Lemon Squeezy configuration details. No Lemon Squeezy API keys or payment details belong in this repository.
 
 See the [security audit](SECURITY-AUDIT.md) for completed hardening and remaining release gates.
 
@@ -202,4 +210,4 @@ Check the live console output in the progress card. YouTube changes can occasion
 
 Only download and edit videos you have permission to use. Respect YouTube's Terms of Service, copyright law, creator rights, and any access restrictions that apply to the content.
 
-Read the current [Terms of Use](docs/TERMS.md), [Privacy Policy](docs/PRIVACY.md), [Disclaimer](docs/DISCLAIMER.md), and [Refund and Cancellation Policy](docs/REFUND-CANCELLATION.md). These documents describe this local, currently unpaid version and require qualified legal review before commercial distribution, network exposure, or payment functionality.
+Read the current [Terms of Use](docs/TERMS.md), [Privacy Policy](docs/PRIVACY.md), [Disclaimer](docs/DISCLAIMER.md), [Refund and Cancellation Policy](docs/REFUND-CANCELLATION.md), and [support contribution notice](docs/SUPPORT-CONTRIBUTIONS.md). These documents describe the free open-source model and optional third-party checkout; obtain qualified legal and tax review before accepting contributions commercially.

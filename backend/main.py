@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.config import BASE_DIR, DOWNLOADS_DIR
-from backend.routes import info, download, files
+from backend.routes import info, download, files, support
 
 app = FastAPI(
     title="YT Cuts",
@@ -26,6 +26,7 @@ app.add_middleware(
 app.include_router(info.router, prefix="/api", tags=["info"])
 app.include_router(download.router, prefix="/api", tags=["download"])
 app.include_router(files.router, prefix="/api", tags=["files"])
+app.include_router(support.router, prefix="/api", tags=["support"])
 
 # Mount downloads directory for serving trimmed clips directly
 app.mount("/downloads", StaticFiles(directory=str(DOWNLOADS_DIR)), name="downloads")

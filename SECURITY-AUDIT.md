@@ -16,12 +16,12 @@ The audit covered the FastAPI backend, `yt-dlp` execution, local file handling, 
 - Made cancellation cleanup task-specific rather than deleting every partial file.
 - Sanitized upstream error responses and stopped returning full tracebacks to the browser.
 - Fixed cancelled SSE streams and escaped all gallery file-derived HTML attributes.
-- Documented that there is no database, account system, authentication, authorization, telemetry, or payment functionality.
+- Added an optional Lemon Squeezy hosted support link without payment credentials, webhooks, customer records, or feature gating.
 
 ## Residual risks and release gates
 
 This is still a local single-user application, not a public multi-user service. The API and `/downloads` files are unauthenticated by design and must remain bound to loopback. Before exposing it to a network, add a reviewed authentication and authorization design, CSRF protection, TLS, per-user storage isolation, persistent job ownership, rate limiting, and an abuse-monitoring plan.
 
-Dependency versions should be pinned and upgraded through a repeatable test process. Add automated integration coverage for download cancellation, concurrent jobs, output naming, filesystem permissions, and the packaged executable. Review the legal documents with qualified counsel before commercial release or enabling payments.
+Dependency versions should be pinned and upgraded through a repeatable test process. Add automated integration coverage for download cancellation, concurrent jobs, output naming, filesystem permissions, and the packaged executable. Review the contribution, privacy, refund, and tax language with qualified professionals before accepting contributions commercially. If the checkout model changes, re-audit it before adding subscriptions or paid features.
 
-No payment functionality was implemented in this audit.
+The app does not process payments. Contributions are optional and handled by the configured hosted Lemon Squeezy checkout.

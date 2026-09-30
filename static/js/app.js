@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const refreshClipsBtn = document.getElementById('refreshClipsBtn');
   const totalStorageDisplay = document.getElementById('totalStorageDisplay');
   const themeToggle = document.getElementById('themeToggle');
+  const supportProjectBtn = document.getElementById('supportProjectBtn');
 
   // State
   let currentVideoMetadata = null;
@@ -64,6 +65,29 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('yt-cuts-theme', nextTheme);
     updateThemeToggle();
   });
+
+  async function configureSupportLink() {
+    try {
+      const support = await API.getSupportConfiguration();
+      if (!support.enabled || !support.checkout_url) return;
+      supportProjectBtn.href = support.checkout_url;
+      supportProjectBtn.target = '_blank';
+      supportProjectBtn.rel = 'noopener noreferrer';
+      supportProjectBtn.setAttribute('aria-disabled', 'false');
+      supportProjectBtn.addEventListener('click', () => {
+        supportProjectBtn.blur();
+      });
+    } catch (err) {
+      console.warn('Optional support link unavailable:', err);
+    }
+  }
+
+  supportProjectBtn.addEventListener('click', (event) => {
+    if (supportProjectBtn.getAttribute('aria-disabled') === 'true') {
+      event.preventDefault();
+    }
+  });
+  configureSupportLink();
 
   // Initialize YouTube Player Manager
   const ytPlayer = new YTPlayerManager('ytPlayerContainer', (currentTime) => {

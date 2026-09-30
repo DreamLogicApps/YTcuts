@@ -77,6 +77,12 @@ const API = {
     return await res.json();
   },
 
+  async getSupportConfiguration() {
+    const res = await fetch('/api/support');
+    if (!res.ok) throw new Error('Failed to retrieve support link.');
+    return await res.json();
+  },
+
   /**
    * Delete a clip from downloads folder
    */

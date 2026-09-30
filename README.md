@@ -2,6 +2,11 @@
 
 YT Cuts is a local YouTube clip editor and downloader. It lets you inspect a YouTube video, choose a time range, preview the selected section, and save the clip locally as MP4, WebM, MKV, or MP3.
 
+<p align="center">
+  <img src="docs/images/screenshot-dark.png" alt="YT Cuts Interface - Dark Mode" width="48%">
+  <img src="docs/images/screenshot-light.png" alt="YT Cuts Interface - Light Mode" width="48%">
+</p>
+
 The application runs on your own computer and is intended for one local user. The FastAPI backend uses `yt-dlp` to retrieve video information and download the selected section, while the browser provides the trimming controls and live progress display. The app is not a public hosted service and must remain bound to localhost unless it is separately hardened.
 
 ## Features

@@ -1675,19 +1675,33 @@ html[data-theme="light"] .brand-icon svg {
 
 /* Footer & Disclaimer Styles */
 .app-footer {
-  margin-top: 3rem;
-  padding: 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
+  margin-top: 4rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  border-top: 1px solid var(--border-color);
   text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  line-height: 1.5;
 }
 
-.footer-content p {
-  margin: 0;
+.footer-content {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+
+.footer-content strong {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.footer-links-row {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .footer-link {

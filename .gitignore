@@ -3,3 +3,7 @@
 *.py[cod]
 downloads/*
 !downloads/.gitkeep
+
+node_modules/
+package-lock.json
+package.json

@@ -1,11 +1,11 @@
 from contextlib import asynccontextmanager
-from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from backend.config import BASE_DIR, DOWNLOADS_DIR
 from backend.routes import info, download, files, support
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):

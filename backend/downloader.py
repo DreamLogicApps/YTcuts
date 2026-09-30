@@ -7,7 +7,6 @@ import uuid
 import traceback
 import shutil
 import time
-from pathlib import Path
 from typing import Dict, Any, AsyncGenerator, Optional
 from backend.config import (
     BASE_DIR,
@@ -27,8 +26,12 @@ def prune_tasks() -> None:
     cutoff = time.time() - TASK_RETENTION_SECONDS
     for task_id, entry in list(active_tasks.items()):
         task = entry["task_obj"]
-        if task.status in {"completed", "failed", "cancelled"} and entry.get("finished_at", 0) < cutoff:
+        if (
+            task.status in {"completed", "failed", "cancelled"}
+            and entry.get("finished_at", 0) < cutoff
+        ):
             active_tasks.pop(task_id, None)
+
 
 def get_python_exe() -> str:
     """Return path to virtualenv python executable if it exists, else sys.executable."""
@@ -36,6 +39,7 @@ def get_python_exe() -> str:
     if venv_py.exists():
         return str(venv_py)
     return sys.executable
+
 
 def format_seconds_to_time(seconds: float) -> str:
     """Format seconds into HH:MM:SS or MM:SS format."""
@@ -47,14 +51,16 @@ def format_seconds_to_time(seconds: float) -> str:
         return f"{hours:02d}:{minutes:02d}:{secs:02d}"
     return f"{minutes:02d}:{secs:02d}"
 
+
 def sanitize_time_input(val: Any) -> str:
     """Ensure start/end time is formatted appropriately for yt-dlp section string."""
     if isinstance(val, (int, float)):
         return format_seconds_to_time(float(val))
     val_str = str(val).strip()
-    if re.match(r'^\d+(\.\d+)?$', val_str):
+    if re.match(r"^\d+(\.\d+)?$", val_str):
         return format_seconds_to_time(float(val_str))
     return val_str
+
 
 def _execute_yt_dlp_sync(cmd: list, task_obj) -> int:
     """Synchronously execute subprocess and stream stdout line-by-line."""
@@ -64,24 +70,26 @@ def _execute_yt_dlp_sync(cmd: list, task_obj) -> int:
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-        encoding='utf-8',
-        errors='replace',
+        encoding="utf-8",
+        errors="replace",
         env=env,
-        bufsize=1
+        bufsize=1,
     )
     task_obj.process = proc
 
-    for line in proc.stdout:
-        if task_obj.cancel_requested:
-            break
-        clean_line = line.strip()
-        if clean_line:
-            task_obj.log(clean_line)
-            task_obj.parse_progress_line(clean_line)
+    if proc.stdout:
+        for line in proc.stdout:
+            if task_obj.cancel_requested:
+                break
+            clean_line = line.strip()
+            if clean_line:
+                task_obj.log(clean_line)
+                task_obj.parse_progress_line(clean_line)
 
     proc.wait()
     task_obj.process = None
     return proc.returncode
+
 
 class DownloadTask:
     def __init__(
@@ -91,7 +99,7 @@ class DownloadTask:
         end_time: str,
         quality: str = "best",
         output_format: str = "mp4",
-        custom_title: Optional[str] = None
+        custom_title: Optional[str] = None,
     ):
         self.task_id = str(uuid.uuid4())
         self.url = url
@@ -102,8 +110,8 @@ class DownloadTask:
         self.custom_title = custom_title
         self.task_dir = DOWNLOADS_DIR / ".tasks" / self.task_id
         self.task_dir.mkdir(parents=True, exist_ok=True)
-        
-        self.status = "queued" # queued, downloading, merging, completed, failed
+
+        self.status = "queued"  # queued, downloading, merging, completed, failed
         self.progress = 0.0
         self.speed = ""
         self.eta = ""
@@ -126,7 +134,9 @@ class DownloadTask:
         if re.fullmatch(r"\d+(?:\.\d+)?", text):
             return float(text)
         parts = text.split(":")
-        if len(parts) not in {2, 3} or any(not re.fullmatch(r"\d+(?:\.\d+)?", part) for part in parts):
+        if len(parts) not in {2, 3} or any(
+            not re.fullmatch(r"\d+(?:\.\d+)?", part) for part in parts
+        ):
             raise ValueError("Times must use seconds or HH:MM:SS format.")
         numbers = [float(part) for part in parts]
         if len(numbers) == 2:
@@ -175,18 +185,24 @@ class DownloadTask:
             return
 
         self.status = "downloading"
-        self.log(f"Starting clip download for section *{self.start_time}-{self.end_time}")
+        self.log(
+            f"Starting clip download for section *{self.start_time}-{self.end_time}"
+        )
 
         # Build output template path according to prompt pattern:
         # downloads/%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s
-        output_template = str(self.task_dir / "%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s")
+        output_template = str(
+            self.task_dir / "%(title)s_clip_%(section_start)s-%(section_end)s.%(ext)s"
+        )
 
         # Format spec logic
         if self.output_format.lower() == "mp3":
             format_spec = "bestaudio/best"
         elif self.quality and self.quality != "best" and self.quality != "audio":
             height = self.quality.replace("p", "")
-            format_spec = f"bestvideo[height<={height}]+bestaudio/best[height<={height}]/best"
+            format_spec = (
+                f"bestvideo[height<={height}]+bestaudio/best[height<={height}]/best"
+            )
         else:
             format_spec = "bestvideo+bestaudio/best"
 
@@ -194,14 +210,23 @@ class DownloadTask:
 
         # Build command following exact prompt specification:
         cmd = [
-            python_exe, "-m", "yt_dlp",
-            "--download-sections", f"*{self.start_time}-{self.end_time}",
-            "--concurrent-fragments", "8",
-            "-f", format_spec,
+            python_exe,
+            "-m",
+            "yt_dlp",
+            "--download-sections",
+            f"*{self.start_time}-{self.end_time}",
+            "--force-keyframes-at-cuts",
+            "--concurrent-fragments",
+            "8",
+            "-f",
+            format_spec,
             "--no-playlist",
             "--no-warnings",
             "--newline",
-            "-o", output_template,
+            "--progress-template",
+            "download:YT_CUTS_PROGRESS|%(progress._percent_str)s|%(progress._speed_str)s|%(progress._eta_str)s",
+            "-o",
+            output_template,
         ]
 
         if self.output_format.lower() == "mp3":
@@ -214,10 +239,16 @@ class DownloadTask:
         self.log("Executing yt-dlp download command.")
 
         try:
-            used_bytes = sum(path.stat().st_size for path in DOWNLOADS_DIR.rglob("*") if path.is_file())
+            used_bytes = sum(
+                path.stat().st_size
+                for path in DOWNLOADS_DIR.rglob("*")
+                if path.is_file()
+            )
             if used_bytes >= MAX_STORAGE_BYTES:
                 self.status = "failed"
-                self.error_message = "Local clip storage is full. Delete older clips and try again."
+                self.error_message = (
+                    "Local clip storage is full. Delete older clips and try again."
+                )
                 self.log(self.error_message)
                 shutil.rmtree(self.task_dir, ignore_errors=True)
                 active_tasks.get(self.task_id, {})["finished_at"] = time.time()
@@ -237,8 +268,12 @@ class DownloadTask:
                 self.status = "completed"
                 self.progress = 100.0
                 current_files = set(self.task_dir.glob("*"))
-                new_files = [f for f in current_files - existing_files if f.is_file() and not f.name.endswith((".part", ".ytdl"))]
-                
+                new_files = [
+                    f
+                    for f in current_files - existing_files
+                    if f.is_file() and not f.name.endswith((".part", ".ytdl"))
+                ]
+
                 if new_files:
                     newest = max(new_files, key=lambda f: f.stat().st_mtime)
                     final_path = DOWNLOADS_DIR / f"{self.task_id}_{newest.name}"
@@ -276,25 +311,61 @@ class DownloadTask:
 
     def parse_progress_line(self, line: str):
         """Parse progress percentage, speed, and ETA from yt-dlp output line."""
-        if "[download]" in line and "%" in line:
-            match = re.search(r'\[download\]\s+(\d+\.?\d*)%\s+of\s+~\s*(\S+)\s+at\s+(\S+)\s+ETA\s+(\S+)', line)
-            if not match:
-                match = re.search(r'\[download\]\s+(\d+\.?\d*)%\s+of\s+(\S+)\s+at\s+(\S+)\s+ETA\s+(\S+)', line)
-            if not match:
-                match = re.search(r'\[download\]\s+(\d+\.?\d*)%', line)
+        template_match = re.search(
+            r"YT_CUTS_PROGRESS\|\s*(\d+(?:\.\d+)?)%?\|([^|]*)\|([^|]*)",
+            line,
+        )
+        if template_match:
+            self.progress = float(template_match.group(1))
+            self.speed = template_match.group(2).strip() or self.speed
+            self.eta = template_match.group(3).strip() or self.eta
+            return
 
-            if match:
+        if "[download]" in line and "%" in line:
+            percent_match = re.search(r"\[download\]\s+(\d+(?:\.\d+)?)%", line)
+            if percent_match:
+                self.progress = float(percent_match.group(1))
+
+                speed_match = re.search(r"\bat\s+(\S+)", line)
+                if speed_match:
+                    self.speed = speed_match.group(1)
+
+                eta_match = re.search(r"\bETA\s+(\S+)", line)
+                if eta_match:
+                    self.eta = eta_match.group(1)
+
+        if "time=" in line and ("frame=" in line or "size=" in line):
+            time_match = re.search(r"time=(\d{2}:\d{2}:\d{2}(?:\.\d+)?)", line)
+            speed_match = re.search(r"speed=\s*(\d+(?:\.\d+)?x)", line)
+
+            if time_match:
                 try:
-                    self.progress = float(match.group(1))
-                    if len(match.groups()) >= 4:
-                        self.speed = match.group(3)
-                        self.eta = match.group(4)
-                except ValueError:
+                    current_time = self.parse_time(time_match.group(1))
+                    start_secs = self.parse_time(self.start_time)
+                    end_secs = self.parse_time(self.end_time)
+                    total_duration = end_secs - start_secs
+
+                    if total_duration > 0:
+                        pct = (current_time / total_duration) * 100
+                        self.progress = min(100.0, max(0.0, pct))
+
+                        if speed_match:
+                            self.speed = speed_match.group(1)
+                            speed_val_match = re.search(r"(\d+(?:\.\d+)?)", self.speed)
+                            if speed_val_match:
+                                speed_val = float(speed_val_match.group(1))
+                                if speed_val > 0:
+                                    eta_secs = (
+                                        total_duration - current_time
+                                    ) / speed_val
+                                    self.eta = format_seconds_to_time(max(0, eta_secs))
+                except Exception:
                     pass
 
-        elif "[Merger]" in line or "Merging formats" in line:
+        if "[Merger]" in line or "Merging formats" in line:
             self.status = "merging"
             self.log("Merging video and audio streams...")
+
 
 async def subscribe_task_progress(task_id: str) -> AsyncGenerator[str, None]:
     """Generator for Server-Sent Events (SSE) progress update."""
@@ -302,7 +373,7 @@ async def subscribe_task_progress(task_id: str) -> AsyncGenerator[str, None]:
     while True:
         task = active_tasks.get(task_id)
         if not task:
-            yield f"data: {{\"error\": \"Task not found\"}}\n\n"
+            yield 'data: {"error": "Task not found"}\n\n'
             break
 
         new_logs = task["task_obj"].logs[last_log_idx:]
@@ -316,10 +387,11 @@ async def subscribe_task_progress(task_id: str) -> AsyncGenerator[str, None]:
             "eta": task["task_obj"].eta,
             "filename": task["task_obj"].filename,
             "error": task["task_obj"].error_message,
-            "logs": new_logs
+            "logs": new_logs,
         }
 
         import json
+
         yield f"data: {json.dumps(event_data)}\n\n"
 
         if task["task_obj"].status in ["completed", "failed", "cancelled"]:

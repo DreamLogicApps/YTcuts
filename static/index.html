@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YT Cuts - Local YouTube Clip Editor</title>
-  <link rel="stylesheet" href="/css/style.css?v=4">
+  <link rel="stylesheet" href="/css/style.css?v=5">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 </head>
 <body>
@@ -35,12 +35,6 @@
           <span>Clips Storage:</span>
           <span class="highlight" id="totalStorageDisplay">0 MB</span>
         </div>
-        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-          <span class="theme-toggle-track" aria-hidden="true">
-            <span class="theme-toggle-icon">☼</span>
-          </span>
-          <span class="theme-toggle-label">Light mode</span>
-        </button>
         <div class="support-area">
           <a id="supportProjectBtn" class="btn btn-secondary btn-sm support-project-btn" aria-disabled="true">
             <svg class="support-project-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -49,6 +43,11 @@
             <span>Support the Project</span>
           </a>
         </div>
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-icon">☼</span>
+          </span>
+        </button>
       </div>
     </header>
 
@@ -94,23 +93,33 @@
         </div>
 
         <div class="video-meta-card">
-          <div>
+          <div class="video-meta-heading">
+            <span class="metadata-kicker">Video details</span>
             <h2 id="videoTitle" class="video-info-title">Video Title</h2>
-            <div id="videoChannel" class="video-info-channel" style="margin-top: 0.4rem;">Channel Name</div>
+            <div id="videoChannel" class="video-info-channel">Channel Name</div>
           </div>
 
           <div class="meta-stats">
             <div class="meta-stat-item">
-              <span>⏱ Total:</span>
-              <strong id="videoDurationText">00:00</strong>
+              <span class="meta-stat-icon" aria-hidden="true">◷</span>
+              <div>
+                <span class="meta-stat-label">Duration</span>
+                <strong id="videoDurationText">00:00</strong>
+              </div>
             </div>
             <div class="meta-stat-item">
-              <span>👁 Views:</span>
-              <strong id="videoViewsText">0</strong>
+              <span class="meta-stat-icon" aria-hidden="true">◉</span>
+              <div>
+                <span class="meta-stat-label">Views</span>
+                <strong id="videoViewsText">0</strong>
+              </div>
             </div>
           </div>
 
-          <p id="videoDescription" style="font-size: 0.8rem; color: var(--text-dim); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"></p>
+          <div class="video-description-block">
+            <span class="metadata-kicker">Description</span>
+            <p id="videoDescription"></p>
+          </div>
         </div>
       </section>
 
@@ -241,7 +250,7 @@
             <span id="progressBadge" class="progress-status-badge downloading">Downloading</span>
           </div>
           <button id="toggleTerminalBtn" class="btn btn-secondary btn-sm">
-            Console Logs ▾
+            Hide Console ▴
           </button>
           <button id="cancelDownloadBtn" class="btn btn-danger btn-sm" type="button" hidden>
             Stop Download
@@ -259,7 +268,7 @@
         </div>
 
         <!-- Terminal Console Box -->
-        <div id="terminalConsole" class="terminal-box" style="display: none;">
+        <div id="terminalConsole" class="terminal-box" style="display: flex;">
           <div class="terminal-line" style="color: #64748b;">[System] Subprocess execution started...</div>
         </div>
       </section>
@@ -282,6 +291,28 @@
     </main>
   </div>
 
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal-backdrop" style="display: none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+        <h3>Delete Clip</h3>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete <strong id="deleteModalFilename"></strong>?</p>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem;">This action cannot be undone and will permanently remove the file from your local storage.</p>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelDeleteBtn" class="btn btn-secondary">Cancel</button>
+        <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="toast-container"></div>
 
@@ -289,6 +320,6 @@
   <script src="/js/api.js?v=5"></script>
   <script src="/js/yt-player.js?v=4"></script>
   <script src="/js/timeline.js?v=4"></script>
-  <script src="/js/app.js?v=5"></script>
+  <script src="/js/app.js?v=7"></script>
 </body>
 </html>

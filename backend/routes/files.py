@@ -1,18 +1,17 @@
-import os
-import shutil
-from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from backend.config import DOWNLOADS_DIR
 
 router = APIRouter()
 
-def format_file_size(size_in_bytes: int) -> str:
+
+def format_file_size(size_in_bytes: float) -> str:
     """Format bytes into human-readable string (KB, MB, GB)."""
-    for unit in ['B', 'KB', 'MB', 'GB']:
+    for unit in ["B", "KB", "MB", "GB"]:
         if size_in_bytes < 1024.0:
             return f"{size_in_bytes:.1f} {unit}"
         size_in_bytes /= 1024.0
     return f"{size_in_bytes:.1f} TB"
+
 
 @router.get("/files")
 async def list_files():
@@ -23,25 +22,30 @@ async def list_files():
     files = []
     total_bytes = 0
 
-    for path in sorted(DOWNLOADS_DIR.glob("*"), key=lambda p: p.stat().st_mtime, reverse=True):
+    for path in sorted(
+        DOWNLOADS_DIR.glob("*"), key=lambda p: p.stat().st_mtime, reverse=True
+    ):
         if path.is_file() and not path.name.endswith((".part", ".ytdl")):
             stat = path.stat()
             size = stat.st_size
             total_bytes += size
-            files.append({
-                "filename": path.name,
-                "size_bytes": size,
-                "size_formatted": format_file_size(size),
-                "created_at": stat.st_mtime,
-                "download_url": f"/downloads/{path.name}",
-                "is_audio": path.name.endswith(".mp3")
-            })
+            files.append(
+                {
+                    "filename": path.name,
+                    "size_bytes": size,
+                    "size_formatted": format_file_size(size),
+                    "created_at": stat.st_mtime,
+                    "download_url": f"/downloads/{path.name}",
+                    "is_audio": path.name.endswith(".mp3"),
+                }
+            )
 
     return {
         "files": files,
         "total_storage": format_file_size(total_bytes),
-        "total_bytes": total_bytes
+        "total_bytes": total_bytes,
     }
+
 
 @router.delete("/files/{filename}")
 async def delete_file(filename: str):

@@ -19,17 +19,20 @@ def validate_youtube_url(url: str) -> str:
     else:
         video_id = parse_qs(parsed.query).get("v", [""])[0]
         if not video_id:
-            match = re.search(r"/(?:embed|shorts|live|v)/([A-Za-z0-9_-]{11})", parsed.path)
+            match = re.search(
+                r"/(?:embed|shorts|live|v)/([A-Za-z0-9_-]{11})", parsed.path
+            )
             video_id = match.group(1) if match else ""
     if not re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id):
         raise ValueError("Enter a valid YouTube video URL.")
     return candidate
 
+
 def extract_video_id(url: str) -> Optional[str]:
     """Extract YouTube video ID from various URL formats."""
     patterns = [
-        r'(?:v=|\/embed\/|\/v\/|youtu\.be\/|\/shorts\/|\/live\/)([a-zA-Z0-9_-]{11})',
-        r'^([a-zA-Z0-9_-]{11})$'
+        r"(?:v=|\/embed\/|\/v\/|youtu\.be\/|\/shorts\/|\/live\/)([a-zA-Z0-9_-]{11})",
+        r"^([a-zA-Z0-9_-]{11})$",
     ]
     for pattern in patterns:
         match = re.search(pattern, url)
@@ -37,17 +40,20 @@ def extract_video_id(url: str) -> Optional[str]:
             return match.group(1)
     return None
 
+
 def _fetch_metadata_sync(url: str) -> Dict[str, Any]:
     """Synchronous call to YoutubeDL.extract_info."""
-    ydl_opts = {
-        'extract_flat': False,
-        'skip_download': True,
-        'quiet': True,
-        'no_warnings': True,
-        'noplaylist': True,
+    ydl_opts: Any = {
+        "extract_flat": False,
+        "skip_download": True,
+        "quiet": True,
+        "no_warnings": True,
+        "noplaylist": True,
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        return ydl.extract_info(url, download=False)
+        info = ydl.extract_info(url, download=False)
+        return dict(info) if info else {}
+
 
 async def get_video_metadata(url: str) -> Dict[str, Any]:
     """
@@ -56,12 +62,14 @@ async def get_video_metadata(url: str) -> Dict[str, Any]:
     """
     validated_url = validate_youtube_url(url)
     video_id = extract_video_id(validated_url)
-    
+
     try:
         # Run blocking yt-dlp call in thread pool
         data = await asyncio.to_thread(_fetch_metadata_sync, validated_url)
     except Exception as e:
-        raise ValueError("Failed to fetch video information. Check the URL and try again.") from e
+        raise ValueError(
+            "Failed to fetch video information. Check the URL and try again."
+        ) from e
 
     if not data:
         raise ValueError("Could not retrieve video metadata.")
@@ -83,11 +91,16 @@ async def get_video_metadata(url: str) -> Dict[str, Any]:
         "video_id": extracted_id,
         "title": data.get("title", "Untitled Video"),
         "duration": duration,
-        "thumbnail": data.get("thumbnail") or (f"https://img.youtube.com/vi/{extracted_id}/maxresdefault.jpg" if extracted_id else ""),
+        "thumbnail": data.get("thumbnail")
+        or (
+            f"https://img.youtube.com/vi/{extracted_id}/maxresdefault.jpg"
+            if extracted_id
+            else ""
+        ),
         "uploader": data.get("uploader") or data.get("channel") or "Unknown Channel",
         "view_count": data.get("view_count", 0),
         "upload_date": data.get("upload_date", ""),
         "description": (data.get("description") or "")[:200],
         "available_qualities": sorted_heights,
-        "webpage_url": data.get("webpage_url", validated_url)
+        "webpage_url": data.get("webpage_url", validated_url),
     }

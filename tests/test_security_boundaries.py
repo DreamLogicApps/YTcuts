@@ -1,4 +1,5 @@
 import unittest
+import shutil
 
 from pydantic import ValidationError
 
@@ -40,6 +41,34 @@ class SecurityBoundaryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             DownloadTask.parse_time("01:60")
         self.assertEqual(DownloadTask.parse_time("01:02:03"), 3723)
+
+    def test_progress_parser_updates_percent_speed_and_eta(self):
+        task = DownloadTask(
+            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            start_time="00:00:01",
+            end_time="00:00:10",
+        )
+        try:
+            task.parse_progress_line("YT_CUTS_PROGRESS| 42.5%|1.20MiB/s|00:08")
+            self.assertEqual(task.progress, 42.5)
+            self.assertEqual(task.speed, "1.20MiB/s")
+            self.assertEqual(task.eta, "00:08")
+        finally:
+            shutil.rmtree(task.task_dir, ignore_errors=True)
+
+    def test_legacy_progress_parser_updates_speed_and_eta(self):
+        task = DownloadTask(
+            url="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+            start_time="00:00:01",
+            end_time="00:00:10",
+        )
+        try:
+            task.parse_progress_line("[download]  25.0% of 10.00MiB at 2.00MiB/s ETA 00:05")
+            self.assertEqual(task.progress, 25.0)
+            self.assertEqual(task.speed, "2.00MiB/s")
+            self.assertEqual(task.eta, "00:05")
+        finally:
+            shutil.rmtree(task.task_dir, ignore_errors=True)
 
     def test_support_url_only_allows_buy_me_a_coffee_profile(self):
         original_url = support.BUYMEACOFFEE_URL

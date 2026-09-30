@@ -52,8 +52,7 @@ async def support_configuration():
 @router.get(DEMO_CHECKOUT_PATH, response_class=HTMLResponse, include_in_schema=False)
 async def demo_checkout():
     """Provide a local, non-payment flow for testing the hosted-link integration."""
-    return HTMLResponse(
-                """
+    return HTMLResponse("""
                 <!doctype html>
                 <html lang="en">
                 <head>
@@ -86,5 +85,4 @@ async def demo_checkout():
                     </script>
                 </body>
                 </html>
-                """
-    )
+                """)

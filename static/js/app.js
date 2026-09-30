@@ -47,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let activeEventSource = null;
   let activeTaskId = null;
 
-  const savedTheme = localStorage.getItem('yt-cuts-theme') || 'dark';
+  const savedTheme = localStorage.getItem('yt-cuts-theme') || 'light';
   document.documentElement.dataset.theme = savedTheme;
 
   function updateThemeToggle() {
@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
     themeToggle.setAttribute('aria-pressed', String(isLight));
     themeToggle.setAttribute('aria-label', isLight ? 'Switch to dark mode' : 'Switch to light mode');
     themeToggle.querySelector('.theme-toggle-icon').textContent = isLight ? '☾' : '☼';
-    themeToggle.querySelector('.theme-toggle-label').textContent = isLight ? 'Dark mode' : 'Light mode';
   }
 
   updateThemeToggle();
@@ -460,11 +459,36 @@ document.addEventListener('DOMContentLoaded', () => {
         clipsGrid.appendChild(card);
       });
 
+      // Delete Modal Helper
+      const deleteModal = document.getElementById('deleteModal');
+      const deleteModalFilename = document.getElementById('deleteModalFilename');
+      const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+      const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+      function askConfirmDelete(filename) {
+        return new Promise((resolve) => {
+          deleteModalFilename.textContent = filename;
+          deleteModal.style.display = 'flex';
+
+          const cleanup = () => {
+            cancelDeleteBtn.removeEventListener('click', onCancel);
+            confirmDeleteBtn.removeEventListener('click', onConfirm);
+            deleteModal.style.display = 'none';
+          };
+
+          const onCancel = () => { cleanup(); resolve(false); };
+          const onConfirm = () => { cleanup(); resolve(true); };
+
+          cancelDeleteBtn.addEventListener('click', onCancel);
+          confirmDeleteBtn.addEventListener('click', onConfirm);
+        });
+      }
+
       // Bind delete buttons
       document.querySelectorAll('.delete-clip-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
           const fname = btn.getAttribute('data-filename');
-          if (confirm(`Are you sure you want to delete '${fname}'?`)) {
+          if (await askConfirmDelete(fname)) {
             try {
               await API.deleteFile(fname);
               showToast(`Deleted ${fname}`, 'success');

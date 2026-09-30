@@ -31,18 +31,24 @@
       </div>
 
       <div class="header-meta">
-        <div class="support-area">
-          <a id="supportProjectBtn" class="btn btn-secondary btn-sm support-project-btn" aria-disabled="true">Support the Project</a>
-          <span class="support-note">Optional contribution. All features stay free.</span>
-        </div>
         <div class="storage-badge">
           <span>Clips Storage:</span>
           <span class="highlight" id="totalStorageDisplay">0 MB</span>
         </div>
         <button id="themeToggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-          <span class="theme-toggle-icon" aria-hidden="true">☼</span>
+          <span class="theme-toggle-track" aria-hidden="true">
+            <span class="theme-toggle-icon">☼</span>
+          </span>
           <span class="theme-toggle-label">Light mode</span>
         </button>
+        <div class="support-area">
+          <a id="supportProjectBtn" class="btn btn-secondary btn-sm support-project-btn" aria-disabled="true">
+            <svg class="support-project-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M20.8 8.7c0 5.2-8.8 10-8.8 10s-8.8-4.8-8.8-10A4.7 4.7 0 0 1 12 6.1a4.7 4.7 0 0 1 8.8 2.6Z"></path>
+            </svg>
+            <span>Support the Project</span>
+          </a>
+        </div>
       </div>
     </header>
 

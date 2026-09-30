@@ -16,12 +16,12 @@ The audit covered the FastAPI backend, `yt-dlp` execution, local file handling, 
 - Made cancellation cleanup task-specific rather than deleting every partial file.
 - Sanitized upstream error responses and stopped returning full tracebacks to the browser.
 - Fixed cancelled SSE streams and escaped all gallery file-derived HTML attributes.
-- Added an optional Lemon Squeezy hosted support link without payment credentials, webhooks, customer records, or feature gating.
+- Added an optional Buy Me a Coffee profile link and a local non-payment demo flow without payment credentials, webhooks, supporter records, or feature gating.
 
 ## Residual risks and release gates
 
 This is still a local single-user application, not a public multi-user service. The API and `/downloads` files are unauthenticated by design and must remain bound to loopback. Before exposing it to a network, add a reviewed authentication and authorization design, CSRF protection, TLS, per-user storage isolation, persistent job ownership, rate limiting, and an abuse-monitoring plan.
 
-Dependency versions should be pinned and upgraded through a repeatable test process. Add automated integration coverage for download cancellation, concurrent jobs, output naming, filesystem permissions, and the packaged executable. Review the contribution, privacy, refund, and tax language with qualified professionals before accepting contributions commercially. If the checkout model changes, re-audit it before adding subscriptions or paid features.
+Dependency versions should be pinned and upgraded through a repeatable test process. Add automated integration coverage for download cancellation, concurrent jobs, output naming, and filesystem permissions. Review the contribution, privacy, refund, and tax language with qualified professionals before accepting contributions commercially. If the support model changes, re-audit it before adding any payment or gated features.
 
-The app does not process payments. Contributions are optional and handled by the configured hosted Lemon Squeezy checkout.
+The app does not process payments. Contributions are optional and handled by the configured Buy Me a Coffee profile.

@@ -17,7 +17,7 @@ The application runs on your own computer and is intended for one local user. Th
 - Live download progress, speed, ETA, and subprocess logs
 - Stop an active download and remove partial files
 - Local downloaded-clip gallery with file size and delete controls
-- Optional voluntary project support through an external Lemon Squeezy checkout
+- Optional voluntary project support through Buy Me a Coffee
 - Responsive layout for desktop, tablet, and small mobile screens
 
 ## How It Works
@@ -92,27 +92,11 @@ Open that address in your browser. FastAPI API documentation is available at:
 http://127.0.0.1:8000/docs
 ```
 
-The launcher enables automatic reload during development and disables it in the frozen executable. Stop the server with `Ctrl+C`.
+The launcher enables automatic reload during development. Stop the server with `Ctrl+C`.
 
-## Windows Portable Executable
+## Deployment
 
-A Windows executable can be built with PyInstaller. From PowerShell:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m pip install pyinstaller
-.\.venv\Scripts\pyinstaller.exe --clean --noconfirm YTTrimmer.spec
-```
-
-The executable is created at `dist\YTTrimmer.exe`. Copy or zip that file to share it with another Windows computer. Double-clicking it starts the local server and opens the app in the default browser at `http://127.0.0.1:8000`.
-
-The executable is portable and does not need Python installed on the target computer. It creates a `downloads` folder beside the executable for completed clips. Internet access is still required for YouTube metadata and downloads.
-
-To rebuild the distribution using the included script:
-
-```powershell
-.\build_windows.ps1
-```
+The current application is designed for local use. See [Deployment](docs/DEPLOYMENT.md) before using Vercel: Vercel can host the static frontend, but the current download backend requires a persistent Python service with FFmpeg, writable storage, background jobs, and SSE support.
 
 ## Project Structure
 
@@ -136,8 +120,7 @@ YT Cuts/
 ├── requirements.txt           Python dependencies
 ├── LICENSE                    MIT open-source license
 ├── run.py                     Development server entry point
-├── YTTrimmer.spec             PyInstaller packaging configuration
-└── build_windows.ps1          Windows build and ZIP script
+└── tests/                     Security boundary regression tests
 ```
 
 ## API Endpoints
@@ -169,9 +152,9 @@ Example download request:
 
 The current release has no accounts, authentication, authorization, database, telemetry, payment processing inside the app, or remote job service. The local API and downloaded files are intentionally available to the local browser. Do not bind the server to a LAN or public interface. Request validation restricts media sources to YouTube, and local storage and active jobs are bounded, but this is not a multi-user security model.
 
-YT Cuts is free to use and open source under the [MIT License](LICENSE). The **Support the Project** link is optional, opens a hosted Lemon Squeezy checkout in a new tab, and does not unlock or gate any core functionality. Configure it with `YT_CUTS_SUPPORT_URL`; without that setting, the clearly labeled control remains inactive.
+YT Cuts is free to use and open source under the [MIT License](LICENSE). The **Support the Project** link is optional, opens the Buy Me a Coffee page in live mode or a local non-payment test page in demo mode, and does not unlock or gate any core functionality. Live mode is enabled by default; set `BUYMEACOFFEE_MODE=demo` when testing locally.
 
-See the [optional support setup](docs/SUPPORT-CONTRIBUTIONS.md) for Lemon Squeezy configuration details. No Lemon Squeezy API keys or payment details belong in this repository.
+See the [optional support setup](docs/SUPPORT-CONTRIBUTIONS.md) for Buy Me a Coffee configuration details. No payment keys or payment details belong in this repository.
 
 See the [security audit](SECURITY-AUDIT.md) for completed hardening and remaining release gates.
 

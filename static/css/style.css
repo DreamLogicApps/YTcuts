@@ -86,6 +86,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  min-width: 0;
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
   border-bottom: var(--glass-border);
@@ -95,6 +96,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.85rem;
+  min-width: 0;
 }
 
 .brand-icon {
@@ -136,24 +138,45 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .support-area {
   display: flex;
   align-items: center;
   gap: 0.55rem;
-}
-
-.support-note {
-  max-width: 12rem;
-  color: var(--text-dim);
-  font-size: 0.7rem;
-  line-height: 1.25;
+  min-width: 0;
+  flex: 0 1 auto;
 }
 
 .support-project-btn[aria-disabled="true"] {
   cursor: not-allowed;
   opacity: 0.6;
+}
+
+.support-project-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.support-project-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: 0 0 auto;
+  transition: stroke var(--transition-fast);
+}
+
+.support-project-btn:hover .support-project-icon,
+.support-project-btn:focus-visible .support-project-icon {
+  fill: #ef4444;
+  stroke: #ef4444;
 }
 
 .storage-badge {
@@ -166,6 +189,8 @@ body {
   border-radius: var(--radius-full);
   font-size: 0.85rem;
   color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .storage-badge span.highlight {
@@ -1324,9 +1349,9 @@ html[data-theme="light"] .brand-icon svg {
 .theme-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.55rem;
   min-height: 2.35rem;
-  padding: 0.45rem 0.75rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.4rem;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-full);
   background: var(--bg-card);
@@ -1334,15 +1359,53 @@ html[data-theme="light"] .brand-icon svg {
   font-size: 0.8rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .theme-toggle:hover {
   background: var(--bg-card-hover);
 }
 
+.theme-toggle-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.35rem;
+  height: 1.3rem;
+  padding: 0.125rem;
+  border-radius: var(--radius-full);
+  background: var(--text-muted);
+  transition: background var(--transition-fast);
+}
+
 .theme-toggle-icon {
-  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-radius: 50%;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.72rem;
   line-height: 1;
+  transform: translateX(0);
+  transition: transform var(--transition-fast), background var(--transition-fast), color var(--transition-fast);
+}
+
+#themeToggle[aria-pressed="true"] .theme-toggle-track {
+  background: var(--text-main);
+}
+
+#themeToggle[aria-pressed="true"] .theme-toggle-icon {
+  transform: translateX(1.05rem);
+}
+
+#themeToggle:focus-visible,
+.support-project-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 3px;
 }
 
 .btn-secondary,

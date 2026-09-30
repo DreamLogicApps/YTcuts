@@ -10,7 +10,7 @@ When you use the application, the local backend processes the YouTube URL and ti
 
 The URL and related requests are sent to YouTube or another upstream service used by `yt-dlp` so that metadata or media can be retrieved. Those services have their own privacy policies and terms. The embedded preview is supplied by YouTube and may contact YouTube directly from the browser.
 
-If you voluntarily choose to support the project, the browser follows the configured hosted Lemon Squeezy checkout link. Lemon Squeezy may collect and process information required for its checkout, payment, fraud prevention, tax, and receipt functions under its own privacy notice and terms. YT Cuts does not receive or store card details, Lemon Squeezy API credentials, or a contribution ledger.
+If you voluntarily choose to support the project, the browser follows the configured Buy Me a Coffee page link. Buy Me a Coffee and its payment providers may collect and process information required for contributions, payment, fraud prevention, tax, and receipt functions under their own privacy notices and terms. YT Cuts does not receive or store card details, payment credentials, or a supporter ledger.
 
 ## Storage and deletion
 

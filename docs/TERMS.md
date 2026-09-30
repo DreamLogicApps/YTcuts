@@ -4,7 +4,7 @@
 
 YT Cuts is a free, open-source local desktop utility for inspecting and creating clips from media that a user is authorized to access and use. It does not provide hosting, accounts, subscriptions, required payments, or a remote processing service.
 
-The application may display an optional **Support the Project** link to a third-party Lemon Squeezy checkout. A contribution is voluntary, does not purchase a license, unlock functionality, create a subscription, or affect access to any feature. Lemon Squeezy is responsible for its hosted checkout, payment processing, receipts, and applicable provider terms.
+The application may display an optional **Support the Project** link to a Buy Me a Coffee page. A contribution is voluntary, does not purchase a license, unlock functionality, create a subscription, or affect access to any core feature. Buy Me a Coffee is responsible for its checkout, payment processing, receipts, and applicable provider terms.
 
 You are responsible for:
 

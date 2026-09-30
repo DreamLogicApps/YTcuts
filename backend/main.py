@@ -1,4 +1,4 @@
-import os
+from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,10 +7,20 @@ from fastapi.staticfiles import StaticFiles
 from backend.config import BASE_DIR, DOWNLOADS_DIR
 from backend.routes import info, download, files, support
 
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    print("====================================================")
+    print("  YT Cuts backend initialized successfully!")
+    print(f"  Downloads directory: {DOWNLOADS_DIR.resolve()}")
+    print("====================================================")
+    yield
+
+
 app = FastAPI(
     title="YT Cuts",
     description="Local YouTube clip editor powered by FastAPI and yt-dlp",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan,
 )
 
 # The app is intentionally local-only. Keep browser access limited to its own UI.
@@ -35,10 +45,3 @@ app.mount("/downloads", StaticFiles(directory=str(DOWNLOADS_DIR)), name="downloa
 STATIC_DIR = BASE_DIR / "static"
 if STATIC_DIR.exists():
     app.mount("/", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
-
-@app.on_event("startup")
-async def startup_event():
-    print("====================================================")
-    print("  YT Cuts backend initialized successfully!")
-    print(f"  Downloads directory: {DOWNLOADS_DIR.resolve()}")
-    print("====================================================")

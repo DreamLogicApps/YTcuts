@@ -41,21 +41,27 @@ class SecurityBoundaryTests(unittest.TestCase):
             DownloadTask.parse_time("01:60")
         self.assertEqual(DownloadTask.parse_time("01:02:03"), 3723)
 
-    def test_support_url_only_allows_lemon_squeezy_checkout(self):
-        original_url = support.LEMON_SQUEEZY_SUPPORT_URL
+    def test_support_url_only_allows_buy_me_a_coffee_profile(self):
+        original_url = support.BUYMEACOFFEE_URL
+        original_mode = support.BUYMEACOFFEE_MODE
         try:
-            support.LEMON_SQUEEZY_SUPPORT_URL = (
-                "https://yt-cuts.lemonsqueezy.com/checkout/buy/example"
-            )
+            support.BUYMEACOFFEE_URL = "https://buymeacoffee.com/example-user"
             self.assertIsNotNone(support.get_valid_support_url())
-            support.LEMON_SQUEEZY_SUPPORT_URL = "https://example.com/checkout/buy/example"
+            support.BUYMEACOFFEE_URL = "https://example.com/example-user"
             self.assertIsNone(support.get_valid_support_url())
-            support.LEMON_SQUEEZY_SUPPORT_URL = (
-                "http://yt-cuts.lemonsqueezy.com/checkout/buy/example"
+            support.BUYMEACOFFEE_URL = "http://buymeacoffee.com/example-user"
+            self.assertIsNone(support.get_valid_support_url())
+            support.BUYMEACOFFEE_MODE = "demo"
+            self.assertEqual(support.get_support_checkout_url(), "/api/support/test-checkout")
+            support.BUYMEACOFFEE_MODE = "live"
+            support.BUYMEACOFFEE_URL = "https://buymeacoffee.com/example-user"
+            self.assertEqual(
+                support.get_support_checkout_url(),
+                "https://buymeacoffee.com/example-user",
             )
-            self.assertIsNone(support.get_valid_support_url())
         finally:
-            support.LEMON_SQUEEZY_SUPPORT_URL = original_url
+            support.BUYMEACOFFEE_URL = original_url
+            support.BUYMEACOFFEE_MODE = original_mode
 
 
 if __name__ == "__main__":

@@ -30,6 +30,13 @@ if __name__ == "__main__":
     # Required for PyInstaller multi-processing
     multiprocessing.freeze_support()
     
+    # INTERCEPTOR: PyInstaller sets sys.executable to this .exe
+    # When downloader.py tries to spawn `sys.executable -m yt_dlp ...`
+    # it accidentally spawns this UI again. This intercepts that and runs yt_dlp directly.
+    if len(sys.argv) >= 3 and sys.argv[1] == "-m" and sys.argv[2] == "yt_dlp":
+        import yt_dlp
+        sys.exit(yt_dlp.main(sys.argv[3:]))
+    
     # Start FastAPI server in a background thread
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()

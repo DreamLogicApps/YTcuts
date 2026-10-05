@@ -80,5 +80,6 @@ if __name__ == "__main__":
     )
     
     # start() blocks the main thread. We pass check_server_and_load to run concurrently.
-    webview.start(check_server_and_load, window)
+    if window is not None:
+        webview.start(check_server_and_load, (window,))
 

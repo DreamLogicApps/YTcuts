@@ -47,32 +47,115 @@ if __name__ == "__main__":
     <head>
         <style>
             body { 
-                background-color: #000; 
-                color: #fff; 
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
+                color: #ffffff; 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 height: 100vh;
                 margin: 0;
+                overflow: hidden;
             }
+            
+            .logo-container {
+                position: relative;
+                margin-bottom: 30px;
+            }
+
             .spinner {
-                width: 40px;
-                height: 40px;
-                border: 4px solid rgba(255,255,255,0.1);
-                border-top-color: #fff;
+                width: 80px;
+                height: 80px;
+                border: 3px solid transparent;
+                border-top-color: rgba(255, 255, 255, 0.9);
+                border-bottom-color: rgba(255, 255, 255, 0.2);
                 border-radius: 50%;
-                animation: spin 1s linear infinite;
-                margin-bottom: 20px;
+                animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+                box-shadow: 0 0 20px rgba(255,255,255,0.1);
             }
-            @keyframes spin { 100% { transform: rotate(360deg); } }
+            
+            .spinner-inner {
+                position: absolute;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                bottom: 10px;
+                border: 3px solid transparent;
+                border-left-color: rgba(255, 255, 255, 0.6);
+                border-radius: 50%;
+                animation: spin-reverse 1s linear infinite;
+            }
+
+            h2 {
+                font-size: 2rem;
+                font-weight: 700;
+                margin: 0 0 10px 0;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                animation: pulse 2s infinite;
+            }
+
+            p {
+                color: #888;
+                font-size: 0.95rem;
+                margin: 0;
+                letter-spacing: 0.5px;
+            }
+
+            .progress-bar {
+                width: 250px;
+                height: 3px;
+                background: #222;
+                margin-top: 35px;
+                border-radius: 4px;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .progress-bar-fill {
+                position: absolute;
+                top: 0;
+                left: 0;
+                height: 100%;
+                width: 40%;
+                background: #fff;
+                border-radius: 4px;
+                animation: progress 1.5s ease-in-out infinite;
+                box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            }
+
+            @keyframes spin { 
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); } 
+            }
+            
+            @keyframes spin-reverse { 
+                0% { transform: rotate(360deg); }
+                100% { transform: rotate(0deg); } 
+            }
+
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.6; }
+            }
+
+            @keyframes progress {
+                0% { left: -40%; }
+                100% { left: 100%; }
+            }
         </style>
     </head>
     <body>
-        <div class="spinner"></div>
-        <h2>Starting YT Cuts Engine...</h2>
-        <p style="color: #888;">Warming up the local server, please wait.</p>
+        <div class="logo-container">
+            <div class="spinner"></div>
+            <div class="spinner-inner"></div>
+        </div>
+        <h2>YT Cuts</h2>
+        <p>Warming up local engine...</p>
+        <div class="progress-bar">
+            <div class="progress-bar-fill"></div>
+        </div>
     </body>
     </html>
     """

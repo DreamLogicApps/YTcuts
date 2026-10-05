@@ -28,8 +28,7 @@ const API = {
       throw new Error(data.detail || 'Failed to start download task.');
     }
     return data;
-  }
-};,
+  },
 
   async cancelDownload(taskId) {
     const res = await fetch(`/api/download/${encodeURIComponent(taskId)}/cancel`, {
@@ -40,8 +39,7 @@ const API = {
       throw new Error(data.detail || 'Failed to stop download.');
     }
     return data;
-  }
-};,
+  },
 
   /**
    * Subscribe to download progress stream via SSE
@@ -95,8 +93,8 @@ const API = {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'Failed to delete file.');
     return data;
-  }
-};
+  },
+
   async getConfig() {
     const res = await fetch('/api/config');
     if (!res.ok) throw new Error('Failed to retrieve config.');
@@ -110,3 +108,4 @@ const API = {
     return data;
   }
 };
+

@@ -277,11 +277,16 @@
       <section class="gallery-section">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
           <div>
-          <h2 style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem;">
-            <span>📂 Downloaded Clips</span>
-            <span id="clipsCountBadge" style="font-size: 0.8rem; background: rgba(255,255,255,0.08); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-weight: 600;">0 clips</span>
-          </h2>
-          <button id="refreshClipsBtn" class="btn btn-secondary btn-sm">🔄 Refresh List</button>
+            <h2 style="font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem;">
+              <span>🗂️ Downloaded Clips</span>
+              <span id="clipsCountBadge" style="font-size: 0.8rem; background: rgba(255,255,255,0.08); padding: 0.2rem 0.6rem; border-radius: var(--radius-full); font-weight: 600;">0 clips</span>
+            </h2>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.8rem; color: var(--text-dim); font-family: monospace;" id="downloadsPathDisplay">Loading path...</span>
+              <button id="openFolderBtn" class="btn btn-secondary" style="padding: 0.15rem 0.4rem; font-size: 0.75rem; border-radius: 4px;" title="Open downloads folder in File Explorer">📂 Open</button>
+            </div>
+          </div>
+          <button id="refreshClipsBtn" class="btn btn-secondary btn-sm" style="margin-top: 0.2rem;">🔄 Refresh List</button>
         </div>
 
         <div id="clipsGrid" class="clips-grid">

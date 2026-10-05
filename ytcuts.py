@@ -20,8 +20,15 @@ if __name__ == "__main__":
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
     
-    # Give the server a moment to start up
-    time.sleep(1.5)
+    # Wait for the server to be fully ready before opening the window
+    import urllib.request
+    for _ in range(30):
+        try:
+            urllib.request.urlopen("http://127.0.0.1:8000/", timeout=1)
+            break
+        except Exception:
+            time.sleep(0.5)
+    
     
     # Create and start the native desktop window using PyWebView
     webview.create_window(

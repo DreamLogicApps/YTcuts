@@ -3,3 +3,5 @@ uvicorn[standard]==0.54.0
 yt-dlp==2026.8.19
 static-ffmpeg==3.0
 pydantic==2.13.5
+
+pywebview==6.2.1

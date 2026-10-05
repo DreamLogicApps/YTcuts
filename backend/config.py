@@ -1,9 +1,16 @@
 import os
 from pathlib import Path
 
+import sys
+
 # Application directories
-BASE_DIR = Path(__file__).resolve().parent.parent
-APP_DATA_DIR = BASE_DIR
+if getattr(sys, "frozen", False):
+    # Running in a PyInstaller bundle
+    BASE_DIR = Path(getattr(sys, "_MEIPASS"))
+    APP_DATA_DIR = Path.cwd()
+else:
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    APP_DATA_DIR = BASE_DIR
 
 DOWNLOADS_DIR = APP_DATA_DIR / "downloads"
 

@@ -44,7 +44,18 @@ The application runs on your own computer and is intended for one local user. Th
 
 The Python dependency `static-ffmpeg` supplies ffmpeg binaries automatically, so a separate ffmpeg installation is normally not required.
 
-## Installation
+## Download Standalone Desktop App (Windows)
+
+The easiest way to use YT Cuts is to download the pre-compiled `.exe` file. No Python installation, virtual environments, or terminal commands are required!
+
+1. Download **[YTCuts.exe](https://github.com/DreamLogicApps/YTcuts/raw/main/dist/YTCuts.exe)**.
+2. Double-click the file to run it. It will instantly open a beautiful standalone desktop window!
+
+*(Note: Windows Defender might show a "SmartScreen" warning because the `.exe` is new and unsigned. You can click "More info" > "Run anyway" to proceed.)*
+
+## Installation from Source (Developers)
+
+If you prefer to run the app from source or are using macOS/Linux:
 
 Clone the repository and enter the project directory:
 
@@ -76,27 +87,13 @@ python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-## Running the App
+## Running from Source
 
 With the virtual environment active, run:
 
 ```bash
-python run.py
+python ytcuts.py
 ```
-
-The server starts at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Open that address in your browser. FastAPI API documentation is available at:
-
-```text
-http://127.0.0.1:8000/docs
-```
-
-The launcher enables automatic reload during development. Stop the server with `Ctrl+C`.
 
 ## Deployment
 

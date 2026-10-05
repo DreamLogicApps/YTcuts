@@ -513,4 +513,30 @@ document.addEventListener('DOMContentLoaded', () => {
   function escapeHtml(str) {
     return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
+
+  // Load Downloads Path
+  async function loadConfig() {
+    try {
+      const config = await API.getConfig();
+      const pathDisplay = document.getElementById('downloadsPathDisplay');
+      if (pathDisplay) {
+        pathDisplay.textContent = config.downloads_dir;
+      }
+    } catch (err) {
+      console.error('Failed to load config:', err);
+    }
+  }
+
+  const openFolderBtn = document.getElementById('openFolderBtn');
+  if (openFolderBtn) {
+    openFolderBtn.addEventListener('click', async () => {
+      try {
+        await API.openDownloadsFolder();
+      } catch (err) {
+        showToast('Failed to open folder', 'error');
+      }
+    });
+  }
+
+  loadConfig();
 });

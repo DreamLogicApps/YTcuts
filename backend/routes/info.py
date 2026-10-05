@@ -19,3 +19,26 @@ async def fetch_info(url: str = Query(..., description="YouTube video URL")):
         raise HTTPException(
             status_code=500, detail="Unable to fetch video information right now."
         ) from e
+
+import os
+import sys
+import subprocess
+from backend.config import DOWNLOADS_DIR
+
+@router.get("/config")
+async def get_app_config():
+    return {"downloads_dir": str(DOWNLOADS_DIR.resolve())}
+
+@router.post("/open-folder")
+async def open_downloads_folder():
+    path = str(DOWNLOADS_DIR.resolve())
+    try:
+        if os.name == 'nt':
+            os.startfile(path)
+        elif sys.platform == 'darwin':
+            subprocess.Popen(['open', path])
+        else:
+            subprocess.Popen(['xdg-open', path])
+        return {"success": True}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
